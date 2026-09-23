@@ -1,0 +1,89 @@
+import { useLocalSearchParams } from 'expo-router';
+import { ScrollView, StyleSheet, View } from 'react-native';
+
+import { EmptyState } from '@/components/EmptyState';
+import { GalleryPostTile } from '@/components/GalleryPostTile';
+import { Header } from '@/components/Header';
+import { ProductCard } from '@/components/ProductCard';
+import { Screen } from '@/components/Screen';
+import { SectionHeader } from '@/components/SectionHeader';
+import { TwoColumnGrid } from '@/components/TwoColumnGrid';
+import { CategoryHero } from '@/features/categories/components/CategoryHero';
+import { getCategoryBySlug } from '@/features/categories/queries';
+import { getGalleryPosts } from '@/features/gallery/queries';
+import { getProducts } from '@/features/products/queries';
+import { layout, spacing } from '@/theme';
+
+export default function CategoryScreen() {
+  const { category: slug } = useLocalSearchParams<{ category: string }>();
+  const category = getCategoryBySlug(slug);
+
+  if (category === undefined) {
+    return (
+      <Screen>
+        <Header showBack />
+        <EmptyState title="カテゴリが見つかりません" />
+      </Screen>
+    );
+  }
+
+  const products = getProducts({ categorySlug: category.slug });
+  const posts = getGalleryPosts(category.slug);
+
+  return (
+    <Screen>
+      <Header showBack title={category.name} />
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <CategoryHero category={category} productCount={products.length} />
+
+        <View style={styles.section}>
+          <SectionHeader title="ギャラリー" actionHref="/gallery" />
+          {posts.length === 0 ? (
+            <EmptyState title="まだ作品がありません" />
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.galleryList}
+            >
+              {posts.map((post) => (
+                <GalleryPostTile key={post.id} post={post} style={styles.galleryTile} />
+              ))}
+            </ScrollView>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="出品された端材" />
+          {products.length === 0 ? (
+            <EmptyState title="まだ出品がありません" />
+          ) : (
+            <TwoColumnGrid
+              items={products}
+              keyExtractor={(product) => product.id}
+              renderItem={(product) => <ProductCard product={product} />}
+            />
+          )}
+        </View>
+      </ScrollView>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  content: {
+    gap: spacing.xxl,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xxxl,
+  },
+  section: {
+    gap: spacing.lg,
+  },
+  galleryList: {
+    gap: spacing.md,
+    paddingHorizontal: layout.screenPaddingX,
+  },
+  galleryTile: {
+    width: 180,
+  },
+});
