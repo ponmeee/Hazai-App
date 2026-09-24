@@ -8,14 +8,18 @@ type FollowingUserListProps = {
   users: UserSummary[];
 };
 
+const AVATAR_SIZE = 100;
+
 export function FollowingUserList({ users }: FollowingUserListProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>フォロー中</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        フォロー中
+      </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
         {users.map((user) => (
           <View key={user.id} style={styles.user}>
-            <UserAvatar uri={user.avatarUrl} size={56} name={user.name} />
+            <UserAvatar uri={user.avatarUrl} size={AVATAR_SIZE} name={user.name} />
             <Text style={styles.name} numberOfLines={1}>
               {user.name}
             </Text>
@@ -31,16 +35,16 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   title: {
-    ...typography.label,
-    color: colors.textSecondary,
+    ...typography.sectionTitle,
+    color: colors.textPrimary,
     paddingHorizontal: layout.screenPaddingX,
   },
   list: {
-    gap: spacing.lg,
+    gap: spacing.xl,
     paddingHorizontal: layout.screenPaddingX,
   },
   user: {
-    width: 64,
+    width: AVATAR_SIZE,
     alignItems: 'center',
     gap: spacing.xs,
   },

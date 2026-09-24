@@ -11,7 +11,8 @@ export type CategorySlug =
 export type Category = {
   slug: CategorySlug;
   name: string;
-  heroImageUrl: string;
+  /** 同梱画像（require の戻り値）または画像 URL */
+  heroImage: number | string;
 };
 
 export type UserSummary = {
@@ -59,7 +60,9 @@ export type GalleryPost = {
   id: string;
   title: string;
   body: string;
+  /** 一覧に表示する1枚目。imageUrls[0] と同じ */
   imageUrl: string;
+  imageUrls: string[];
   categorySlug: CategorySlug;
   likeCount: number;
   commentCount: number;

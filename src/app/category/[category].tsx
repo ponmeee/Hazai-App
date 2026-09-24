@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
-import { GalleryPostTile } from '@/components/GalleryPostTile';
+import { GalleryPortraitCard } from '@/components/GalleryPortraitCard';
 import { Header } from '@/components/Header';
 import { ProductCard } from '@/components/ProductCard';
 import { QueryView } from '@/components/QueryView';
@@ -37,7 +37,7 @@ function CategoryContent({ category }: { category: Category }) {
                 contentContainerStyle={styles.galleryList}
               >
                 {posts.map((post) => (
-                  <GalleryPostTile key={post.id} post={post} style={styles.galleryTile} />
+                  <GalleryPortraitCard key={post.id} post={post} style={styles.galleryCard} />
                 ))}
               </ScrollView>
             )
@@ -83,18 +83,17 @@ export default function CategoryScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.xxl,
-    paddingTop: spacing.xs,
+    gap: spacing.xxxl,
     paddingBottom: spacing.xxxl,
   },
   section: {
     gap: spacing.lg,
   },
   galleryList: {
-    gap: spacing.md,
+    gap: spacing.lg,
     paddingHorizontal: layout.screenPaddingX,
   },
-  galleryTile: {
+  galleryCard: {
     width: 180,
   },
 });

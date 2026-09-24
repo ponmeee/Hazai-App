@@ -22,11 +22,13 @@ export const queryKeys = {
     detail: (id: string) => ['products', 'detail', id] as const,
   },
   galleryPosts: {
+    all: ['galleryPosts'] as const,
     list: (filter: GalleryPostFilter) => ['galleryPosts', filter] as const,
   },
   viewer: {
     all: ['viewer'] as const,
     following: ['viewer', 'following'] as const,
+    favoriteProductIds: ['viewer', 'favoriteProductIds'] as const,
     conversations: ['viewer', 'conversations'] as const,
     conversation: (id: string) => ['viewer', 'conversations', id] as const,
     messages: (conversationId: string) => ['viewer', 'messages', conversationId] as const,

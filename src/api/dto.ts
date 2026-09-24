@@ -45,6 +45,7 @@ export type GalleryPostDto = {
   title: string;
   body: string;
   imageUrl: string;
+  imageUrls: string[];
   categorySlug: CategorySlug;
   likeCount: number;
   commentCount: number;

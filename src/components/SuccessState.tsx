@@ -1,23 +1,32 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { PrimaryButton } from '@/components/PrimaryButton';
 import { colors, layout, spacing, typography } from '@/theme';
 
-type ListingSuccessProps = {
-  onViewProduct: () => void;
-  onListAnother: () => void;
+import { PrimaryButton } from './PrimaryButton';
+
+type SuccessAction = {
+  label: string;
+  onPress: () => void;
 };
 
-export function ListingSuccess({ onViewProduct, onListAnother }: ListingSuccessProps) {
+type SuccessStateProps = {
+  title: string;
+  description: string;
+  primaryAction: SuccessAction;
+  secondaryAction: SuccessAction;
+};
+
+/** 出品・投稿などが完了した後の画面 */
+export function SuccessState({ title, description, primaryAction, secondaryAction }: SuccessStateProps) {
   return (
     <View style={styles.container}>
       <Ionicons name="checkmark-circle" size={56} color={colors.success} />
-      <Text style={styles.title}>出品しました</Text>
-      <Text style={styles.description}>「かう」や各カテゴリの一覧に表示されます。</Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.description}>{description}</Text>
       <View style={styles.actions}>
-        <PrimaryButton label="出品した商品を見る" onPress={onViewProduct} />
-        <PrimaryButton label="続けて出品する" variant="secondary" onPress={onListAnother} />
+        <PrimaryButton label={primaryAction.label} onPress={primaryAction.onPress} />
+        <PrimaryButton label={secondaryAction.label} variant="secondary" onPress={secondaryAction.onPress} />
       </View>
     </View>
   );

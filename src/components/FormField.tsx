@@ -1,20 +1,29 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, spacing, typography } from '@/theme';
+import { colors, fontWeights, spacing, typography } from '@/theme';
 
 type FormFieldProps = {
   label: string;
   required?: boolean;
+  /** sub: 見出しの下にまとめた項目の小さなラベル */
+  labelVariant?: 'default' | 'sub';
   error?: string;
   hint?: string;
   children: ReactNode;
 };
 
-export function FormField({ label, required = false, error, hint, children }: FormFieldProps) {
+export function FormField({
+  label,
+  required = false,
+  labelVariant = 'default',
+  error,
+  hint,
+  children,
+}: FormFieldProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
+      <Text style={labelVariant === 'sub' ? styles.subLabel : styles.label}>
         {label}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
@@ -36,7 +45,12 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.label,
+    ...fontWeights.bold,
     color: colors.textPrimary,
+  },
+  subLabel: {
+    ...typography.bodySmall,
+    color: colors.textTertiary,
   },
   required: {
     color: colors.danger,

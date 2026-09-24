@@ -1,8 +1,10 @@
 import { Image, type ImageSource } from 'expo-image';
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, typography } from '@/theme';
+import { CreateTabButton } from '@/features/create/components/CreateTabButton';
+import { colors, spacing, typography } from '@/theme';
 
 type TabIconSet = { active: ImageSource; inactive: ImageSource };
 
@@ -27,7 +29,12 @@ function TabIcon({ icons, focused }: { icons: TabIconSet; focused: boolean }) {
   );
 }
 
+// 中央のプラスボタン（直径 48）が収まる高さ。セーフエリアの分は別に足す
+const TAB_BAR_HEIGHT = 60;
+
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -35,7 +42,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.textPrimary,
         tabBarInactiveTintColor: colors.textTertiary,
         tabBarLabelStyle: styles.label,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { height: TAB_BAR_HEIGHT + insets.bottom }],
       }}
     >
       <Tabs.Screen
@@ -50,6 +57,13 @@ export default function TabLayout() {
         options={{
           title: 'かう',
           tabBarIcon: ({ focused }) => <TabIcon icons={tabIcons.buy} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: '出品・投稿',
+          tabBarButton: () => <CreateTabButton />,
         }}
       />
       <Tabs.Screen
@@ -72,6 +86,7 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
+    paddingTop: spacing.xs,
     backgroundColor: colors.background,
     borderTopColor: colors.divider,
   },

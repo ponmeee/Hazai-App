@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, fontWeights, radius, spacing, typography } from '@/theme';
 
 type CategoryTagProps = {
   label: string;
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.caption,
-    fontWeight: '600',
+    ...fontWeights.semiBold,
     color: colors.textPrimary,
   },
 });

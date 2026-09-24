@@ -24,9 +24,9 @@ export const queryAll = <T>(sql: string, params: Params = {}): T[] =>
 export const queryOne = <T>(sql: string, params: Params = {}): T | undefined =>
   db.prepare(sql).get(params) as unknown as T | undefined;
 
-export const execute = (sql: string, params: Params = {}): void => {
-  db.prepare(sql).run(params);
-};
+/** 変更された行数を返す */
+export const execute = (sql: string, params: Params = {}): number =>
+  Number(db.prepare(sql).run(params).changes);
 
 export function transaction<T>(fn: () => T): T {
   db.exec('BEGIN');

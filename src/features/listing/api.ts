@@ -1,11 +1,8 @@
-import { apiRequest } from '@/api/client';
 import { createProduct } from '@/features/products/api';
+import { uploadImages } from '@/features/uploads/api';
 import type { Product } from '@/types/models';
 
 import { parsePrice, type ListingFormValues } from './validateListing';
-
-const uploadImage = async (base64: string): Promise<string> =>
-  (await apiRequest<{ url: string }>('/uploads', { method: 'POST', body: { data: base64 } })).url;
 
 const toOptionalText = (value: string): string | null => (value.trim() === '' ? null : value.trim());
 
@@ -16,7 +13,7 @@ export async function submitListing(values: ListingFormValues): Promise<Product>
     throw new Error('submitListing は検証済みの入力で呼び出す');
   }
 
-  const imageUrls = await Promise.all(values.images.map((image) => uploadImage(image.base64)));
+  const imageUrls = await uploadImages(values.images);
 
   return createProduct({
     name: values.name.trim(),

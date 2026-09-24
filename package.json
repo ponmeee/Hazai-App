@@ -15,13 +15,16 @@
     "server:install": "npm --prefix server install"
   },
   "dependencies": {
+    "@expo-google-fonts/manrope": "^0.4.2",
     "@expo/metro-runtime": "~57.0.16",
     "@expo/vector-icons": "^15.0.2",
     "@tanstack/react-query": "^5.103.2",
     "expo": "~57.0.24",
     "expo-constants": "~57.0.19",
+    "expo-font": "~57.0.4",
     "expo-image": "~57.0.5",
     "expo-image-picker": "~57.0.19",
+    "expo-linear-gradient": "~57.0.2",
     "expo-linking": "~57.0.10",
     "expo-router": "~57.0.22",
     "expo-secure-store": "~57.0.4",

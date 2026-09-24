@@ -12,7 +12,7 @@ import type { RegisterInput } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { leaveAuthScreen } from '@/features/auth/navigation';
 import { PASSWORD_MIN_LENGTH, validateRegister, type RegisterErrors } from '@/features/auth/validation';
-import { colors, layout, spacing, typography } from '@/theme';
+import { colors, fontWeights, layout, spacing, typography } from '@/theme';
 
 const initialInput: RegisterInput = { email: '', password: '', name: '', location: '', genre: '' };
 
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   switchLink: {
     ...typography.bodySmall,
-    fontWeight: '700',
+    ...fontWeights.bold,
     color: colors.accent,
   },
 });

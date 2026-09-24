@@ -41,7 +41,9 @@ export type GalleryPostDto = {
   id: string;
   title: string;
   body: string;
+  /** 一覧に表示する1枚目。imageUrls[0] と同じ */
   imageUrl: string;
+  imageUrls: string[];
   categorySlug: CategorySlug;
   likeCount: number;
   commentCount: number;

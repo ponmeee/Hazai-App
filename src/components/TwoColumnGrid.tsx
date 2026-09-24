@@ -40,12 +40,12 @@ export function TwoColumnGrid<T>({ items, keyExtractor, renderItem }: TwoColumnG
 
 const styles = StyleSheet.create({
   grid: {
-    gap: spacing.xl,
+    gap: spacing.xxl,
     paddingHorizontal: layout.screenPaddingX,
   },
   row: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   cell: {
     flex: 1,

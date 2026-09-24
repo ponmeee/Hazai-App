@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, layout, radius, spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import type { Category } from '@/types/models';
+import { formatNumber } from '@/utils/format';
 
 type CategoryHeroProps = {
   category: Category;
@@ -14,14 +15,14 @@ export function CategoryHero({ category, productCount }: CategoryHeroProps) {
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: category.heroImageUrl }}
+        source={category.heroImage}
         contentFit="cover"
         transition={200}
         style={styles.image}
       />
       <View style={styles.overlay}>
         <Text style={styles.name}>{category.name}</Text>
-        <Text style={styles.count}>出品数 {productCount ?? '–'}件</Text>
+        <Text style={styles.count}>{productCount === undefined ? '–' : formatNumber(productCount)}点</Text>
       </View>
     </View>
   );
@@ -29,28 +30,26 @@ export function CategoryHero({ category, productCount }: CategoryHeroProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: layout.screenPaddingX,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
     backgroundColor: colors.surface,
   },
   image: {
     width: '100%',
-    aspectRatio: 16 / 10,
+    // カテゴリのトップ画像素材（assets/images/categories）の比率に合わせる
+    aspectRatio: 2 / 1,
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     gap: spacing.xxs,
-    padding: spacing.xl,
-    backgroundColor: colors.overlay,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.overlayStrong,
   },
   name: {
     ...typography.display,
     color: colors.textOnDark,
   },
   count: {
-    ...typography.label,
-    color: colors.textOnDark,
+    ...typography.captionSmall,
+    color: colors.textOnDarkMuted,
   },
 });

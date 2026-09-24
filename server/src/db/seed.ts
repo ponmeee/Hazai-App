@@ -21,6 +21,7 @@ export function clearDatabase(): void {
       'messages',
       'conversation_participants',
       'conversations',
+      'product_favorites',
       'gallery_posts',
       'products',
       'follows',
@@ -62,9 +63,9 @@ export async function seedDatabase(): Promise<void> {
 
     for (const post of seedGalleryPosts) {
       execute(
-        `INSERT INTO gallery_posts (id, author_id, title, body, image_url, category_slug, like_count, comment_count, created_at)
-         VALUES (:id, :authorId, :title, :body, :imageUrl, :categorySlug, :likeCount, :commentCount, :createdAt)`,
-        post,
+        `INSERT INTO gallery_posts (id, author_id, title, body, image_url, image_urls, category_slug, like_count, comment_count, created_at)
+         VALUES (:id, :authorId, :title, :body, :imageUrl, :imageUrls, :categorySlug, :likeCount, :commentCount, :createdAt)`,
+        { ...post, imageUrl: post.imageUrls[0] ?? '', imageUrls: JSON.stringify(post.imageUrls) },
       );
     }
   });

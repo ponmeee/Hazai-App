@@ -8,7 +8,8 @@ import {
   PRODUCT_LIMITS,
   SHIPPING_METHODS,
 } from '../domain.ts';
-import { badRequest, notFound, parseJsonBody, type AppEnv } from '../http.ts';
+import { badRequest, forbidden, notFound, parseJsonBody, type AppEnv } from '../http.ts';
+import { addFavorite, removeFavorite } from '../repositories/productFavorites.ts';
 import { findProductById, insertProduct, listProducts } from '../repositories/products.ts';
 import { UPLOADED_IMAGE_PATH_PATTERN } from './uploads.ts';
 
@@ -19,6 +20,12 @@ const listQuerySchema = z.object({
   sort: z.enum(['newest', 'popular']).default('newest'),
   limit: z.coerce.number().int().min(1).max(100).optional(),
 });
+
+const requireProduct = (id: string) => {
+  const product = findProductById(id);
+  if (product === undefined) throw notFound('商品が見つかりません');
+  return product;
+};
 
 const optionalText = z
   .string()
@@ -67,13 +74,19 @@ export const productRoutes = new Hono<AppEnv>()
     const { category, q, sellerId, sort, limit } = result.data;
     return c.json(listProducts({ categorySlug: category, keyword: q, sellerId, sort, limit }));
   })
-  .get('/:id', (c) => {
-    const product = findProductById(c.req.param('id'));
-    if (product === undefined) throw notFound('商品が見つかりません');
-    return c.json(product);
-  })
+  .get('/:id', (c) => c.json(requireProduct(c.req.param('id'))))
   .post('/', requireAuth, async (c) => {
     const input = await parseJsonBody(c, createSchema);
     const id = insertProduct(c.get('userId'), input);
     return c.json(findProductById(id), 201);
+  })
+  .post('/:id/favorite', requireAuth, (c) => {
+    const product = requireProduct(c.req.param('id'));
+    if (product.seller.id === c.get('userId')) throw forbidden('自分の商品はお気に入りに追加できません');
+    addFavorite(c.get('userId'), product.id);
+    return c.body(null, 204);
+  })
+  .delete('/:id/favorite', requireAuth, (c) => {
+    removeFavorite(c.get('userId'), requireProduct(c.req.param('id')).id);
+    return c.body(null, 204);
   });

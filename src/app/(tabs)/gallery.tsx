@@ -13,7 +13,7 @@ import { getCategories } from '@/features/categories/queries';
 import { FollowingUserList } from '@/features/gallery/components/FollowingUserList';
 import { useGalleryPosts } from '@/features/gallery/hooks';
 import { useFollowingUsers } from '@/features/users/hooks';
-import { colors, layout, spacing } from '@/theme';
+import { spacing } from '@/theme';
 import type { CategorySlug } from '@/types/models';
 
 export default function GalleryScreen() {
@@ -46,6 +46,7 @@ export default function GalleryScreen() {
               categories={getCategories()}
               selected={selectedCategory}
               onSelect={setSelectedCategory}
+              variant="soft"
             />
             {followingUsers.length > 0 && <FollowingUserList users={followingUsers} />}
           </View>
@@ -66,14 +67,8 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
     paddingTop: spacing.xs,
     paddingBottom: spacing.xl,
-    marginBottom: spacing.xl,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
   },
   separator: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: spacing.xl,
-    marginHorizontal: layout.screenPaddingX,
-    backgroundColor: colors.divider,
+    height: spacing.lg,
   },
 });

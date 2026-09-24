@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { RealtimeMessageSync } from '@/features/messages/RealtimeMessageSync';
+import { useAppFonts } from '@/hooks/useAppFonts';
 import { colors, layout } from '@/theme';
 
 const createQueryClient = () =>
@@ -20,6 +21,7 @@ const createQueryClient = () =>
 
 export default function RootLayout() {
   const [queryClient] = useState(createQueryClient);
+  const isFontReady = useAppFonts();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -27,12 +29,15 @@ export default function RootLayout() {
         <RealtimeMessageSync />
         <View style={styles.backdrop}>
           <View style={styles.app}>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.background },
-              }}
-            />
+            {/* フォント読み込み前に描画すると、一瞬システムフォントで表示されてから切り替わるため待つ */}
+            {isFontReady && (
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.background },
+                }}
+              />
+            )}
           </View>
           <StatusBar style="dark" />
         </View>

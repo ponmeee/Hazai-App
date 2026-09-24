@@ -46,6 +46,7 @@ export const toProduct = (dto: ProductDto): Product => ({
 export const toGalleryPost = (dto: GalleryPostDto): GalleryPost => ({
   ...dto,
   imageUrl: resolveAssetUrl(dto.imageUrl),
+  imageUrls: dto.imageUrls.map(resolveAssetUrl),
   author: toUserSummary(dto.author),
 });
 

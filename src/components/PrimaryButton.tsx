@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, fontWeights, radius, spacing, typography } from '@/theme';
 
 type PrimaryButtonProps = {
   label: string;
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   button: {
     height: 48,
     paddingHorizontal: spacing.xl,
-    borderRadius: radius.md,
+    borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.subheading,
+    ...fontWeights.bold,
   },
   primaryLabel: {
     color: colors.textOnDark,

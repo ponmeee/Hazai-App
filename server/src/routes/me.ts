@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { requireAuth } from '../auth/middleware.ts';
 import { notFound, parseJsonBody, type AppEnv } from '../http.ts';
+import { listFavoriteProductIds } from '../repositories/productFavorites.ts';
 import { getAccount, listFollowing, updateProfile } from '../repositories/users.ts';
 
 const profileSchema = z.object({
@@ -26,4 +27,5 @@ export const meRoutes = new Hono<AppEnv>()
     updateProfile(c.get('userId'), patch);
     return c.json(requireAccount(c.get('userId')));
   })
-  .get('/following', (c) => c.json(listFollowing(c.get('userId'))));
+  .get('/following', (c) => c.json(listFollowing(c.get('userId'))))
+  .get('/favorite-product-ids', (c) => c.json(listFavoriteProductIds(c.get('userId'))));

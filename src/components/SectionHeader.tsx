@@ -1,7 +1,8 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link, type Href } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, layout, typography } from '@/theme';
+import { colors, layout, spacing, typography } from '@/theme';
 
 type SectionHeaderProps = {
   title: string;
@@ -9,15 +10,18 @@ type SectionHeaderProps = {
   actionHref?: Href;
 };
 
-export function SectionHeader({ title, actionLabel = 'すべて見る', actionHref }: SectionHeaderProps) {
+export function SectionHeader({ title, actionLabel = 'もっとみる', actionHref }: SectionHeaderProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title} accessibilityRole="header">
         {title}
       </Text>
       {actionHref !== undefined && (
-        <Link href={actionHref} style={styles.action}>
-          {actionLabel}
+        <Link href={actionHref} asChild>
+          <Pressable style={styles.action} hitSlop={spacing.sm}>
+            <Text style={styles.actionLabel}>{actionLabel}</Text>
+            <Ionicons name="chevron-forward" size={12} color={colors.textTertiary} />
+          </Pressable>
         </Link>
       )}
     </View>
@@ -32,11 +36,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingX,
   },
   title: {
-    ...typography.heading,
+    ...typography.sectionTitle,
     color: colors.textPrimary,
   },
   action: {
-    ...typography.label,
-    color: colors.textSecondary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
+  },
+  actionLabel: {
+    ...typography.caption,
+    color: colors.textTertiary,
   },
 });

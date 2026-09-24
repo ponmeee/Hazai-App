@@ -12,7 +12,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { DemoAccountList } from '@/features/auth/components/DemoAccountList';
 import { leaveAuthScreen } from '@/features/auth/navigation';
 import { validateLogin, type LoginErrors } from '@/features/auth/validation';
-import { colors, layout, spacing, typography } from '@/theme';
+import { colors, fontWeights, layout, spacing, typography } from '@/theme';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   switchLink: {
     ...typography.bodySmall,
-    fontWeight: '700',
+    ...fontWeights.bold,
     color: colors.accent,
   },
 });

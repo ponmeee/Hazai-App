@@ -11,3 +11,7 @@ export const getCategoryBySlug = (slug: string): Category | undefined =>
 
 export const getCategoryName = (slug: CategorySlug): string =>
   getCategoryBySlug(slug)?.name ?? '';
+
+/** フォームの選択肢（ChipSelector）用 */
+export const getCategoryOptions = (): { value: CategorySlug; label: string }[] =>
+  categories.map((category) => ({ value: category.slug, label: category.name }));

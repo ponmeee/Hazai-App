@@ -89,6 +89,20 @@ const migrations: string[] = [
   );
   CREATE INDEX messages_conversation_id_idx ON messages(conversation_id, created_at);
   `,
+  `
+  CREATE TABLE product_favorites (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, product_id)
+  );
+  CREATE INDEX product_favorites_product_id_idx ON product_favorites(product_id);
+  `,
+  // 作品に複数枚の画像を持たせる。image_url は一覧で使う1枚目として残す
+  `
+  ALTER TABLE gallery_posts ADD COLUMN image_urls TEXT NOT NULL DEFAULT '[]';
+  UPDATE gallery_posts SET image_urls = json_array(image_url);
+  `,
 ];
 
 export function migrate(db: DatabaseSync): void {

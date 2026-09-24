@@ -47,11 +47,14 @@ npm run server:seed      # 全データを削除してデモデータを入れ�
 | POST | `/auth/logout` | 要 | セッションを破棄 |
 | GET / PATCH | `/me` | 要 | 自分のアカウント取得・プロフィール更新 |
 | GET | `/me/following` | 要 | フォロー中のユーザー |
+| GET | `/me/favorite-product-ids` | 要 | お気に入りに追加した商品の ID（新しい順） |
 | GET | `/users/:id` | | プロフィール |
 | GET | `/products` | | 一覧（`category` `q` `sellerId` `sort=newest\|popular` `limit`） |
 | GET | `/products/:id` | | 詳細 |
 | POST | `/products` | 要 | 出品（画像は先に `/uploads` へ送る） |
+| POST / DELETE | `/products/:id/favorite` | 要 | お気に入りの追加・解除（自分の商品は追加不可） |
 | GET | `/gallery-posts` | | 一覧（`category` `authorId`） |
+| POST | `/gallery-posts` | 要 | 作品の投稿（画像は先に `/uploads` へ送る。1〜4枚） |
 | GET / POST | `/conversations` | 要 | 会話一覧・会話の開始（同じ相手と商品なら既存を返す） |
 | GET | `/conversations/:id` | 要 | 会話の詳細（参加者のみ） |
 | GET / POST | `/conversations/:id/messages` | 要 | メッセージ取得・送信（参加者のみ） |

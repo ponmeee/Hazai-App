@@ -1,20 +1,15 @@
+import type { PickedImage } from '@/features/uploads/pickImages';
 import type { CategorySlug, ProductCondition, ShippingMethod } from '@/types/models';
 import { formatNumber } from '@/utils/format';
 
 export const MAX_LISTING_IMAGES = 6;
 export const NAME_MAX_LENGTH = 40;
 export const DESCRIPTION_MAX_LENGTH = 1000;
-const PRICE_MIN = 1;
-const PRICE_MAX = 9_999_999;
-
-/** プレビュー用の uri と、アップロード用の base64 を併せて持つ */
-export type ListingImage = {
-  uri: string;
-  base64: string;
-};
+export const PRICE_MIN = 1;
+export const PRICE_MAX = 9_999_999;
 
 export type ListingFormValues = {
-  images: ListingImage[];
+  images: PickedImage[];
   name: string;
   categorySlug: CategorySlug | null;
   size: string;

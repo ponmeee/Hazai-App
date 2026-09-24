@@ -10,6 +10,7 @@ import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { getCategoryName } from '@/features/categories/queries';
+import { useProductFavorite } from '@/features/favorites/hooks';
 import { useStartConversation } from '@/features/messages/hooks';
 import { ProductActionBar } from '@/features/products/components/ProductActionBar';
 import { ProductImageViewer } from '@/features/products/components/ProductImageViewer';
@@ -36,14 +37,16 @@ function ProductDetail({ product }: { product: Product }) {
   const { status, account } = useAuth();
   const isOwnProduct = account?.id === product.seller.id;
 
-  const [isFavorite, setIsFavorite] = useState(false);
+  const favorite = useProductFavorite(product);
   const [isInCart, setIsInCart] = useState(false);
   const [notice, showNotice] = useTransientMessage();
   const startConversation = useStartConversation();
 
   const toggleFavorite = () => {
-    showNotice(isFavorite ? 'お気に入りを解除しました' : 'お気に入りに追加しました');
-    setIsFavorite((value) => !value);
+    if (status === 'signedIn') {
+      showNotice(favorite.isFavorite ? 'お気に入りを解除しました' : 'お気に入りに追加しました');
+    }
+    favorite.toggle((error) => showNotice(getErrorMessage(error)));
   };
 
   const addToCart = () => {
@@ -109,7 +112,7 @@ function ProductDetail({ product }: { product: Product }) {
           <Text style={styles.ownProductNote}>あなたが出品した商品です</Text>
         ) : (
           <ProductActionBar
-            isFavorite={isFavorite}
+            isFavorite={favorite.isFavorite}
             isInCart={isInCart}
             onToggleFavorite={toggleFavorite}
             onAddToCart={addToCart}

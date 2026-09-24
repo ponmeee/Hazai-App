@@ -7,13 +7,14 @@ import { FormField } from './FormField';
 type FormInputProps = Omit<TextInputProps, 'style'> & {
   label: string;
   required?: boolean;
+  labelVariant?: 'default' | 'sub';
   error?: string;
   hint?: string;
 };
 
-export function FormInput({ label, required, error, hint, multiline, ...inputProps }: FormInputProps) {
+export function FormInput({ label, required, labelVariant, error, hint, multiline, ...inputProps }: FormInputProps) {
   return (
-    <FormField label={label} required={required} error={error} hint={hint}>
+    <FormField label={label} required={required} labelVariant={labelVariant} error={error} hint={hint}>
       <TextInput
         {...inputProps}
         multiline={multiline}
@@ -27,18 +28,18 @@ export function FormInput({ label, required, error, hint, multiline, ...inputPro
 
 const styles = StyleSheet.create({
   input: {
-    ...typography.body,
-    minHeight: 48,
+    ...typography.input,
+    minHeight: 44,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
     backgroundColor: colors.background,
     color: colors.textPrimary,
   },
   multiline: {
-    minHeight: 120,
+    minHeight: 96,
     textAlignVertical: 'top',
   },
   invalid: {

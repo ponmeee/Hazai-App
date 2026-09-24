@@ -13,4 +13,6 @@ export const layout = {
   screenPaddingX: spacing.lg,
   // Web ではスマホ幅の1カラムとして中央に表示する
   maxContentWidth: 520,
+  // 作品カードの写真の縦横比（デザインのカード幅 362 に対して高さ 420）
+  postPhotoAspectRatio: 362 / 420,
 } as const;

@@ -1,18 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { FormField } from '@/components/FormField';
-import { colors, radius, spacing, typography } from '@/theme';
-
-import type { ListingImage } from '../validateListing';
+import { pickImagesFromLibrary, type PickedImage } from '@/features/uploads/pickImages';
+import { colors, fontWeights, radius, spacing, typography } from '@/theme';
 
 type ImagePickerFieldProps = {
-  images: ListingImage[];
+  images: PickedImage[];
   maxCount: number;
   error?: string;
-  onChange: (images: ListingImage[]) => void;
+  onChange: (images: PickedImage[]) => void;
   onPickError: (message: string) => void;
 };
 
@@ -20,26 +18,16 @@ export function ImagePickerField({ images, maxCount, error, onChange, onPickErro
   const remaining = maxCount - images.length;
 
   const pickImages = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsMultipleSelection: true,
-      selectionLimit: remaining,
-      quality: 0.7,
-      // アップロードを Web・ネイティブ共通の JSON で行うため base64 で受け取る
-      base64: true,
-    });
-    if (result.canceled) return;
-    const picked = result.assets.flatMap((asset) =>
-      typeof asset.base64 === 'string' ? [{ uri: asset.uri, base64: asset.base64 }] : [],
-    );
-    if (picked.length < result.assets.length) onPickError('読み込めなかった画像があります');
-    onChange([...images, ...picked].slice(0, maxCount));
+    const result = await pickImagesFromLibrary(remaining);
+    if (result === null) return;
+    if (result.hasUnreadable) onPickError('読み込めなかった画像があります');
+    onChange([...images, ...result.images].slice(0, maxCount));
   };
 
   const removeImage = (uri: string) => onChange(images.filter((image) => image.uri !== uri));
 
   return (
-    <FormField label={`商品画像（${images.length}/${maxCount}）`} error={error} hint="1枚目が一覧に表示されます">
+    <FormField label={`出品画像（最大${maxCount}枚）`} error={error} hint="1枚目が一覧に表示されます">
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
         {remaining > 0 && (
           <Pressable
@@ -48,8 +36,8 @@ export function ImagePickerField({ images, maxCount, error, onChange, onPickErro
             accessibilityLabel="画像を追加"
             style={({ pressed }) => [styles.tile, styles.addTile, pressed && styles.pressed]}
           >
-            <Ionicons name="camera-outline" size={24} color={colors.textSecondary} />
-            <Text style={styles.addLabel}>追加</Text>
+            <Ionicons name="camera-outline" size={24} color={colors.textTertiary} />
+            <Text style={styles.addLabel}>画像追加</Text>
           </Pressable>
         )}
         {images.map(({ uri }, index) => (
@@ -71,7 +59,7 @@ export function ImagePickerField({ images, maxCount, error, onChange, onPickErro
   );
 }
 
-const TILE_SIZE = 88;
+const TILE_SIZE = 80;
 
 const styles = StyleSheet.create({
   list: {
@@ -80,7 +68,7 @@ const styles = StyleSheet.create({
   tile: {
     width: TILE_SIZE,
     height: TILE_SIZE,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     overflow: 'hidden',
     backgroundColor: colors.surface,
   },
@@ -90,14 +78,16 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: colors.border,
+    borderColor: colors.textTertiary,
+    backgroundColor: colors.background,
   },
   pressed: {
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.surface,
   },
   addLabel: {
-    ...typography.caption,
-    color: colors.textSecondary,
+    ...typography.captionSmall,
+    ...fontWeights.semiBold,
+    color: colors.textTertiary,
   },
   image: {
     width: '100%',

@@ -24,3 +24,9 @@ export const PRODUCT_LIMITS = {
   priceMax: 9_999_999,
   maxImages: 6,
 } as const;
+
+export const GALLERY_POST_LIMITS = {
+  titleMaxLength: 40,
+  bodyMaxLength: 1000,
+  maxImages: 4,
+} as const;

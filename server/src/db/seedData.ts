@@ -37,7 +37,8 @@ type SeedGalleryPost = {
   authorId: string;
   title: string;
   body: string;
-  imageUrl: string;
+  /** 先頭が一覧に表示される */
+  imageUrls: string[];
   categorySlug: CategorySlug;
   likeCount: number;
   commentCount: number;
@@ -253,61 +254,69 @@ export const seedGalleryPosts: SeedGalleryPost[] = [
   {
     id: 'g1', authorId: 'u3', title: '杉の端材でつくったスツール',
     body: '棚の制作で余った杉材を集めて、小さなスツールにしました。脚の角度を何度も試して、ようやく安定する形に。',
-    imageUrl: unsplash('1503602642458-232111445657', 1000), categorySlug: 'wood',
+    imageUrls: [
+      unsplash('1503602642458-232111445657', 1000), unsplash('1506439773649-6e0eb8cfb237', 1000), unsplash('1589939705384-5185137a7f0f', 1000),
+    ], categorySlug: 'wood',
     likeCount: 214, commentCount: 18, createdAt: '2026-09-22T11:00:00.000Z',
   },
   {
     id: 'g2', authorId: 'u2', title: 'ガラス片の一輪挿し',
     body: 'ステンドグラスの残りを溶着して、一輪挿しをつくりました。光が当たると机に色が落ちるのが好きです。',
-    imageUrl: unsplash('1518895949257-7621c3c786d7', 1000), categorySlug: 'glass',
+    imageUrls: [
+      unsplash('1518895949257-7621c3c786d7', 1000), unsplash('1565193566173-7a0ee3dbe261', 1000),
+    ], categorySlug: 'glass',
     likeCount: 386, commentCount: 27, createdAt: '2026-09-21T09:00:00.000Z',
   },
   {
     id: 'g3', authorId: 'u1', title: 'ウォールナットのサイドテーブル',
     body: 'キャビネットの端材を天板に。脚はナラの残り材です。',
-    imageUrl: unsplash('1611486212557-88be5ff6f941', 1000), categorySlug: 'wood',
+    imageUrls: [unsplash('1611486212557-88be5ff6f941', 1000)], categorySlug: 'wood',
     likeCount: 158, commentCount: 12, createdAt: '2026-09-20T03:00:00.000Z',
   },
   {
     id: 'g4', authorId: 'u6', title: 'アクリル絵具のフルイドアート',
     body: '余った絵具を混ぜて流したら、思いがけない模様に。',
-    imageUrl: unsplash('1557672172-298e090bd0f1', 1000), categorySlug: 'acrylic',
+    imageUrls: [unsplash('1557672172-298e090bd0f1', 1000)], categorySlug: 'acrylic',
     likeCount: 97, commentCount: 6, createdAt: '2026-09-19T12:00:00.000Z',
   },
   {
     id: 'g5', authorId: 'u7', title: 'ヌメ革のショルダーバッグ',
     body: 'ハギレをパッチワークして、ひとつのバッグに仕立てました。',
-    imageUrl: unsplash('1473188588951-666fce8e7c68', 1000), categorySlug: 'leather',
+    imageUrls: [
+      unsplash('1473188588951-666fce8e7c68', 1000), unsplash('1547949003-9792a18a2601', 1000),
+    ], categorySlug: 'leather',
     likeCount: 263, commentCount: 21, createdAt: '2026-09-18T01:00:00.000Z',
   },
   {
     id: 'g6', authorId: 'u1', title: '端材の椅子、もう一脚',
     body: '工房に残っていたナラ材で。背もたれのカーブを削り出すのに三日かかりました。',
-    imageUrl: unsplash('1506439773649-6e0eb8cfb237', 1000), categorySlug: 'wood',
+    imageUrls: [unsplash('1506439773649-6e0eb8cfb237', 1000)], categorySlug: 'wood',
     likeCount: 132, commentCount: 9, createdAt: '2026-09-16T06:00:00.000Z',
   },
   {
     id: 'g7', authorId: 'u6', title: '紙の切れ端でつくるウォールアート',
     body: '色紙の残りを額に入れて並べました。',
-    imageUrl: unsplash('1513519245088-0e12902e5a38', 1000), categorySlug: 'paper',
+    imageUrls: [unsplash('1513519245088-0e12902e5a38', 1000)], categorySlug: 'paper',
     likeCount: 74, commentCount: 4, createdAt: '2026-09-14T00:00:00.000Z',
   },
   {
     id: 'g8', authorId: 'u5', title: 'はぎれのピローカバー',
     body: 'リネンのはぎれをつないでピローカバーに。',
-    imageUrl: unsplash('1616627561839-074385245ff6', 1000), categorySlug: 'fabric',
+    imageUrls: [
+      unsplash('1616627561839-074385245ff6', 1000), unsplash('1528458909336-e7a0adfed0a5', 1000), unsplash('1550684376-efcbd6e3f031', 1000),
+    ], categorySlug: 'fabric',
     likeCount: 145, commentCount: 11, createdAt: '2026-09-12T04:00:00.000Z',
   },
   {
     id: 'g9', authorId: 'u4', title: 'アクリル絵具の厚塗り',
     body: 'パレットに残った色だけで一枚描いてみました。',
-    imageUrl: unsplash('1605721911519-3dfeb3be25e7', 1000), categorySlug: 'acrylic',
+    imageUrls: [unsplash('1605721911519-3dfeb3be25e7', 1000)], categorySlug: 'acrylic',
     likeCount: 88, commentCount: 5, createdAt: '2026-09-10T08:00:00.000Z',
   },
   {
     id: 'g10', authorId: 'u1', title: '端材の器',
     body: '小さな器をつくりました。釉薬の残りで色づけしています。',
-    imageUrl: unsplash('1610701596007-11502861dcfa', 1000), categorySlug: 'other',
+    imageUrls: [unsplash('1610701596007-11502861dcfa', 1000)], categorySlug: 'other',
     likeCount: 201, commentCount: 15, createdAt: '2026-09-08T02:00:00.000Z',
   },
 ];
