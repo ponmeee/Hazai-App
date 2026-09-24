@@ -130,7 +130,7 @@ npx expo start --web      # http://localhost:8081
 
 これらは `npm run test:db` で自動検証しています（他人の商品を編集できない、会話外のユーザーがメッセージを読めない、他人の Storage に書き込めない など）。
 
-### DB 型定義 aaa
+### DB 型定義 aaaiueo
 
 `src/lib/supabase/database.types.ts` はマイグレーションに対応する型定義です。スキーマを変更したら再生成してください。
 
