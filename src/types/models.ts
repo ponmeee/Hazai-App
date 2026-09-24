@@ -13,6 +13,8 @@ export type Category = {
   name: string;
   /** 同梱画像（require の戻り値）または画像 URL */
   heroImage: number | string;
+  /** ホームのカテゴリ一覧に出す丸い写真（同梱画像） */
+  thumbnail: number;
 };
 
 export type UserSummary = {

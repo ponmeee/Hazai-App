@@ -1,44 +1,23 @@
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme';
-import type { Category, CategorySlug } from '@/types/models';
-
-type MaterialIconName = ComponentProps<typeof MaterialCommunityIcons>['name'];
-
-const categoryIconNames: Record<CategorySlug, MaterialIconName> = {
-  wood: 'pine-tree',
-  glass: 'glass-fragile',
-  fabric: 'tshirt-crew-outline',
-  acrylic: 'cube-outline',
-  leather: 'wallet-outline',
-  metal: 'nut',
-  paper: 'note-outline',
-  other: 'dots-horizontal',
-};
+import type { Category } from '@/types/models';
 
 type CategoryIconProps = {
   category: Category;
 };
 
+const THUMBNAIL_SIZE = 60;
+
 export function CategoryIcon({ category }: CategoryIconProps) {
   return (
-    <Link
-      href={{ pathname: '/category/[category]', params: { category: category.slug } }}
-      asChild
-    >
+    <Link href={{ pathname: '/category/[category]', params: { category: category.slug } }} asChild>
       <Pressable accessibilityLabel={category.name}>
         {({ pressed }) => (
           <View style={[styles.container, pressed && styles.pressed]}>
-            <View style={styles.circle}>
-              <MaterialCommunityIcons
-                name={categoryIconNames[category.slug]}
-                size={26}
-                color={colors.accent}
-              />
-            </View>
+            <Image source={category.thumbnail} contentFit="cover" style={styles.thumbnail} />
             <Text style={styles.label}>{category.name}</Text>
           </View>
         )}
@@ -50,21 +29,19 @@ export function CategoryIcon({ category }: CategoryIconProps) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.xxs,
   },
   pressed: {
     opacity: 0.6,
   },
-  circle: {
-    width: 60,
-    height: 60,
+  thumbnail: {
+    width: THUMBNAIL_SIZE,
+    height: THUMBNAIL_SIZE,
     borderRadius: radius.full,
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.surface,
   },
   label: {
-    ...typography.caption,
+    ...typography.captionSmall,
     color: colors.textPrimary,
   },
 });

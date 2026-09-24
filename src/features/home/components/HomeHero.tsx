@@ -1,16 +1,20 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, layout, radius, spacing, typography } from '@/theme';
+import { colors, fontWeights, spacing, typography } from '@/theme';
 
-type HomeHeroProps = {
-  imageUrl: string;
-};
+// デザインの画像枠（幅 402 × 高さ 162）の比率
+const HERO_ASPECT_RATIO = 402 / 162;
 
-export function HomeHero({ imageUrl }: HomeHeroProps) {
+export function HomeHero() {
   return (
     <View style={styles.container}>
-      <Image source={{ uri: imageUrl }} contentFit="cover" transition={200} style={styles.image} />
+      <Image
+        source={require('../../../../assets/images/home/hero.jpg')}
+        contentFit="cover"
+        transition={200}
+        style={styles.image}
+      />
       <View style={styles.overlay}>
         <Text style={styles.copy}>{'使いきれなかった素材を\n必要としている誰かへ。'}</Text>
       </View>
@@ -20,23 +24,21 @@ export function HomeHero({ imageUrl }: HomeHeroProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: layout.screenPaddingX,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
     backgroundColor: colors.surface,
   },
   image: {
     width: '100%',
-    aspectRatio: 4 / 3,
+    aspectRatio: HERO_ASPECT_RATIO,
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    justifyContent: 'flex-end',
-    padding: spacing.xl,
-    backgroundColor: colors.overlay,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xxl,
+    backgroundColor: colors.overlayStrong,
   },
   copy: {
-    ...typography.display,
+    ...typography.input,
+    ...fontWeights.semiBold,
     color: colors.textOnDark,
   },
 });

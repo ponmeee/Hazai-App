@@ -4,10 +4,11 @@ import type { GalleryPostFilter } from '@/api/queryKeys';
 import { supabase } from '@/lib/supabase/client';
 import type { CategorySlug, GalleryPost } from '@/types/models';
 
-export async function fetchGalleryPosts({ categorySlug, authorId }: GalleryPostFilter): Promise<GalleryPost[]> {
+export async function fetchGalleryPosts({ categorySlug, authorId, limit }: GalleryPostFilter): Promise<GalleryPost[]> {
   let query = supabase.from('gallery_posts').select(GALLERY_POST_SELECT).order('created_at', { ascending: false });
   if (categorySlug !== undefined) query = query.eq('category', categorySlug);
   if (authorId !== undefined) query = query.eq('author_id', authorId);
+  if (limit !== undefined) query = query.limit(limit);
   return unwrap(await query).map(toGalleryPost);
 }
 

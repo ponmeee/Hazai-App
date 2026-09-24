@@ -24,6 +24,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPaddingX,
   },
   card: {
-    width: 148,
+    width: 176,
   },
 });

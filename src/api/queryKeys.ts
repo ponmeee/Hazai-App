@@ -8,6 +8,8 @@ export type ProductListFilter = {
 export type GalleryPostFilter = {
   categorySlug?: CategorySlug;
   authorId?: string;
+  /** 新しい順に何件まで取るか。省略時はすべて */
+  limit?: number;
 };
 
 /**

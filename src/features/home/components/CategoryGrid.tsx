@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    rowGap: spacing.xl,
+    rowGap: spacing.md,
     paddingHorizontal: layout.screenPaddingX,
   },
   cell: {

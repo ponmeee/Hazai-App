@@ -2,7 +2,6 @@ import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
-import { GalleryPortraitCard } from '@/components/GalleryPortraitCard';
 import { Header } from '@/components/Header';
 import { ProductCard } from '@/components/ProductCard';
 import { QueryView } from '@/components/QueryView';
@@ -11,9 +10,10 @@ import { SectionHeader } from '@/components/SectionHeader';
 import { TwoColumnGrid } from '@/components/TwoColumnGrid';
 import { CategoryHero } from '@/features/categories/components/CategoryHero';
 import { getCategoryBySlug } from '@/features/categories/queries';
+import { GalleryPortraitList } from '@/features/gallery/components/GalleryPortraitList';
 import { useGalleryPosts } from '@/features/gallery/hooks';
 import { useProducts } from '@/features/products/hooks';
-import { layout, spacing } from '@/theme';
+import { spacing } from '@/theme';
 import type { Category } from '@/types/models';
 
 function CategoryContent({ category }: { category: Category }) {
@@ -31,15 +31,7 @@ function CategoryContent({ category }: { category: Category }) {
             posts.length === 0 ? (
               <EmptyState title="まだ作品がありません" />
             ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.galleryList}
-              >
-                {posts.map((post) => (
-                  <GalleryPortraitCard key={post.id} post={post} style={styles.galleryCard} />
-                ))}
-              </ScrollView>
+              <GalleryPortraitList posts={posts} />
             )
           }
         </QueryView>
@@ -88,12 +80,5 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: spacing.lg,
-  },
-  galleryList: {
-    gap: spacing.lg,
-    paddingHorizontal: layout.screenPaddingX,
-  },
-  galleryCard: {
-    width: 180,
   },
 });
