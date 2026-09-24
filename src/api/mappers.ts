@@ -4,6 +4,7 @@ import type {
   Account,
   CategorySlug,
   Conversation,
+  GalleryComment,
   GalleryPost,
   Message,
   Product,
@@ -25,11 +26,14 @@ export const LISTING_SELECT = `id, title, description, price, category, status, 
   seller:profiles!listings_seller_id_fkey(${PROFILE_SUMMARY_COLUMNS}),
   listing_images(storage_path, sort_order)` as const;
 
-export const GALLERY_POST_SELECT = `id, title, description, category, created_at,
+export const GALLERY_POST_SELECT = `id, title, description, category, like_count, comment_count, created_at,
   author:profiles!gallery_posts_author_id_fkey(${PROFILE_SUMMARY_COLUMNS}),
   gallery_images(storage_path, sort_order)` as const;
 
 export const MESSAGE_COLUMNS = 'id, conversation_id, sender_id, content, created_at' as const;
+
+export const GALLERY_COMMENT_SELECT = `id, gallery_post_id, content, created_at,
+  author:profiles!gallery_comments_author_id_fkey(${PROFILE_SUMMARY_COLUMNS})` as const;
 
 type ProfileSummaryRow = Pick<Tables<'profiles'>, 'id' | 'display_name' | 'avatar_url' | 'location' | 'genre'>;
 type ImageRow = { storage_path: string; sort_order: number };
@@ -49,9 +53,16 @@ export type ListingRow = Pick<
   | 'created_at'
 > & { seller: ProfileSummaryRow; listing_images: ImageRow[] };
 
-export type GalleryPostRow = Pick<Tables<'gallery_posts'>, 'id' | 'title' | 'description' | 'category' | 'created_at'> & {
+export type GalleryPostRow = Pick<
+  Tables<'gallery_posts'>,
+  'id' | 'title' | 'description' | 'category' | 'like_count' | 'comment_count' | 'created_at'
+> & {
   author: ProfileSummaryRow;
   gallery_images: ImageRow[];
+};
+
+type GalleryCommentRow = Pick<Tables<'gallery_comments'>, 'id' | 'gallery_post_id' | 'content' | 'created_at'> & {
+  author: ProfileSummaryRow;
 };
 
 type MessageRow = Pick<Tables<'messages'>, 'id' | 'conversation_id' | 'sender_id' | 'content' | 'created_at'>;
@@ -102,7 +113,7 @@ export const toUserSummary = (row: ProfileSummaryRow): UserSummary => ({
 
 export const toAccount = (
   profile: ProfileSummaryRow & Pick<Tables<'profiles'>, 'bio'>,
-  stats: { follower_count: number | null; following_count: number | null } | null,
+  stats: { follower_count: number | null; following_count: number | null; like_count: number | null } | null,
   email: string,
 ): Account => {
   const userProfile: UserProfile = {
@@ -110,8 +121,7 @@ export const toAccount = (
     bio: profile.bio,
     followerCount: stats?.follower_count ?? 0,
     followingCount: stats?.following_count ?? 0,
-    // いいね機能は未実装のため常に 0
-    likeCount: 0,
+    likeCount: stats?.like_count ?? 0,
   };
   return { ...userProfile, email };
 };
@@ -141,13 +151,20 @@ export const toGalleryPost = (row: GalleryPostRow): GalleryPost => {
     imageUrl: imageUrls[0] ?? '',
     imageUrls,
     categorySlug: toCategorySlug(row.category),
-    // いいね・コメント機能は未実装のため常に 0
-    likeCount: 0,
-    commentCount: 0,
+    likeCount: row.like_count,
+    commentCount: row.comment_count,
     createdAt: row.created_at,
     author: toUserSummary(row.author),
   };
 };
+
+export const toGalleryComment = (row: GalleryCommentRow): GalleryComment => ({
+  id: row.id,
+  postId: row.gallery_post_id,
+  body: row.content,
+  createdAt: row.created_at,
+  author: toUserSummary(row.author),
+});
 
 export const toMessage = (row: MessageRow): Message => ({
   id: row.id,

@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Link } from 'expo-router';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { getCategoryName } from '@/features/categories/queries';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -15,42 +16,51 @@ type GalleryPostTileProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-/** カテゴリ詳細やマイページで使う、ギャラリー投稿のコンパクト表示 */
+/** カテゴリ詳細やマイページで使う、ギャラリー投稿のコンパクト表示。押すと作品詳細を開く */
 export function GalleryPostTile({ post, style }: GalleryPostTileProps) {
   return (
-    <View style={[styles.container, style]}>
-      <View>
-        <Image source={{ uri: post.imageUrl }} contentFit="cover" transition={200} style={styles.image} />
-        <View style={styles.tagOverlay}>
-          <CategoryTag label={getCategoryName(post.categorySlug)} />
-        </View>
-      </View>
-      <Text style={styles.title} numberOfLines={1}>
-        {post.title}
-      </Text>
-      <View style={styles.metaRow}>
-        <View style={styles.author}>
-          <UserAvatar uri={post.author.avatarUrl} size={20} name={post.author.name} />
-          <Text style={styles.authorName} numberOfLines={1}>
-            {post.author.name}
-          </Text>
-        </View>
-        <View style={styles.stat}>
-          <Ionicons name="heart-outline" size={14} color={colors.textSecondary} />
-          <Text style={styles.statText}>{formatNumber(post.likeCount)}</Text>
-        </View>
-        <View style={styles.stat}>
-          <Ionicons name="chatbubble-outline" size={13} color={colors.textSecondary} />
-          <Text style={styles.statText}>{formatNumber(post.commentCount)}</Text>
-        </View>
-      </View>
-    </View>
+    <Link href={{ pathname: '/posts/[id]', params: { id: post.id } }} asChild>
+      <Pressable accessibilityLabel={`${post.title}の詳細`} style={style}>
+        {({ pressed }) => (
+          <View style={[styles.container, pressed && styles.pressed]}>
+            <View>
+              <Image source={{ uri: post.imageUrl }} contentFit="cover" transition={200} style={styles.image} />
+              <View style={styles.tagOverlay}>
+                <CategoryTag label={getCategoryName(post.categorySlug)} />
+              </View>
+            </View>
+            <Text style={styles.title} numberOfLines={1}>
+              {post.title}
+            </Text>
+            <View style={styles.metaRow}>
+              <View style={styles.author}>
+                <UserAvatar uri={post.author.avatarUrl} size={20} name={post.author.name} />
+                <Text style={styles.authorName} numberOfLines={1}>
+                  {post.author.name}
+                </Text>
+              </View>
+              <View style={styles.stat}>
+                <Ionicons name="heart-outline" size={14} color={colors.textSecondary} />
+                <Text style={styles.statText}>{formatNumber(post.likeCount)}</Text>
+              </View>
+              <View style={styles.stat}>
+                <Ionicons name="chatbubble-outline" size={13} color={colors.textSecondary} />
+                <Text style={styles.statText}>{formatNumber(post.commentCount)}</Text>
+              </View>
+            </View>
+          </View>
+        )}
+      </Pressable>
+    </Link>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     gap: spacing.sm,
+  },
+  pressed: {
+    opacity: 0.8,
   },
   image: {
     width: '100%',

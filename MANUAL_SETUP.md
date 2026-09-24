@@ -46,7 +46,8 @@ npx supabase db push
 
 - `login` はブラウザが開くので Supabase にログインして許可する
 - `link` の途中で **手順 1 の Database Password** を聞かれたら入力する
-- `db push` で `supabase/migrations/` の 4 ファイルが適用され、テーブル・RLS・Storage バケット・Realtime 設定がすべて作られる
+- `db push` で `supabase/migrations/` のファイルが順に適用され、テーブル・RLS・Storage バケット・Realtime 設定がすべて作られる
+- あとからマイグレーションが追加されたとき（例: `20260925000001_signup_bio.sql`）も、同じく `npx supabase db push` で未適用の分だけが適用される
 
 **確認**: Dashboard → **Table Editor** に `profiles` `listings` などが並び、各テーブルに「RLS enabled」と表示されていること。Dashboard → **Storage** に `avatars` `listing-images` `gallery-images` があること。
 
@@ -151,6 +152,8 @@ Dashboard → **Authentication → URL Configuration**
 | 9 | お気に入り | B で A の商品の ♡ を押す → 再読み込みしても維持される。もう一度押すと解除 |
 | 10 | カート | B で「カートに追加」→ マイページ右上のカートに表示 → ゴミ箱で削除 |
 | 11 | ギャラリー投稿 | 「出品・投稿」→ 作品を投稿（写真付き）→ ギャラリーに表示される |
+| 11-2 | いいね・コメント | B で A の作品の ♡ を押す → 再読み込みしても残り、件数が増える。作品のタイトルか吹き出しを押して詳細を開き、コメントを送る |
+| 11-3 | 作品の削除 | A でマイページ → 自分のギャラリーの作品 → 「作品を削除する」（2 回押す）。B には削除ボタンが出ない |
 | 12 | チャット・Realtime | B で A の商品の「出品者へ問い合わせる」→ メッセージ送信。A のメッセージ画面に**再読み込みなしで**届く |
 | 13 | 会話外のユーザー | 3 つ目のアカウント C では、A と B の会話が一覧に出ない |
 | 14 | 他人の Storage に書き込めない | `npm run test:db` の storage テストで検証済み（本番でも同じポリシーが適用される） |

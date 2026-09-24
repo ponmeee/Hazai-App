@@ -72,6 +72,14 @@ export type GalleryPost = {
   author: UserSummary;
 };
 
+export type GalleryComment = {
+  id: string;
+  postId: string;
+  body: string;
+  createdAt: string;
+  author: UserSummary;
+};
+
 export type Message = {
   id: string;
   conversationId: string;

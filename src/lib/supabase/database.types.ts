@@ -211,31 +211,109 @@ export type Database = {
           },
         ];
       };
+      gallery_comments: {
+        Row: {
+          author_id: string;
+          content: string;
+          created_at: string;
+          gallery_post_id: string;
+          id: string;
+        };
+        Insert: {
+          author_id?: string;
+          content: string;
+          created_at?: string;
+          gallery_post_id: string;
+          id?: string;
+        };
+        Update: {
+          author_id?: string;
+          content?: string;
+          created_at?: string;
+          gallery_post_id?: string;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'gallery_comments_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'gallery_comments_gallery_post_id_fkey';
+            columns: ['gallery_post_id'];
+            isOneToOne: false;
+            referencedRelation: 'gallery_posts';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      gallery_likes: {
+        Row: {
+          created_at: string;
+          gallery_post_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          gallery_post_id: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          gallery_post_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'gallery_likes_gallery_post_id_fkey';
+            columns: ['gallery_post_id'];
+            isOneToOne: false;
+            referencedRelation: 'gallery_posts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'gallery_likes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       gallery_posts: {
         Row: {
           author_id: string;
           category: string;
+          comment_count: number;
           created_at: string;
           description: string;
           id: string;
+          like_count: number;
           title: string;
           updated_at: string;
         };
         Insert: {
           author_id?: string;
           category: string;
+          comment_count?: number;
           created_at?: string;
           description?: string;
           id?: string;
+          like_count?: number;
           title: string;
           updated_at?: string;
         };
         Update: {
           author_id?: string;
           category?: string;
+          comment_count?: number;
           created_at?: string;
           description?: string;
           id?: string;
+          like_count?: number;
           title?: string;
           updated_at?: string;
         };
@@ -422,6 +500,7 @@ export type Database = {
           follower_count: number | null;
           following_count: number | null;
           id: string | null;
+          like_count: number | null;
         };
         Relationships: [];
       };

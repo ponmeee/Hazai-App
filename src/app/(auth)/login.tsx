@@ -1,17 +1,27 @@
 import { useMutation } from '@tanstack/react-query';
-import { Link } from 'expo-router';
+import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { getErrorMessage } from '@/api/errors';
 import { FormInput } from '@/components/FormInput';
-import { Header } from '@/components/Header';
+import { IconButton } from '@/components/IconButton';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { leaveAuthScreen } from '@/features/auth/navigation';
 import { validateLogin, type LoginErrors } from '@/features/auth/validation';
-import { colors, fontWeights, layout, spacing, typography } from '@/theme';
+import { colors, layout, radius, spacing, typography } from '@/theme';
+import { goBackOr } from '@/utils/navigation';
+
+// 画像素材の縦横比（左上の三角 361×334、ロゴ文字 646×294、箱のマーク 305×336、下の波 1026×511）
+const CORNER_WIDTH = 188;
+const CORNER_HEIGHT = CORNER_WIDTH * (334 / 361);
+const LOGO_TYPE_WIDTH = 240;
+const LOGO_MARK_WIDTH = 106;
+// デザインのボタン列の幅
+const FORM_MAX_WIDTH = 266;
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -33,40 +43,72 @@ export default function LoginScreen() {
 
   return (
     <Screen edges={['top', 'bottom']}>
-      <Header showBack title="ログイン" />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <FormInput
-          label="メールアドレス"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          inputMode="email"
-          error={errors.email}
-        />
-        <FormInput
-          label="パスワード"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoComplete="current-password"
-          onSubmitEditing={submit}
-          error={errors.password}
-        />
+        <View style={styles.corner}>
+          <Image
+            source={require('../../../assets/images/auth/corner.png')}
+            contentFit="fill"
+            style={styles.cornerImage}
+          />
+          <View style={styles.closeButton}>
+            {/* 起動時はホームの上に重ねて出すため、閉じるとホーム（または開く前の画面）に戻る */}
+            <IconButton icon="close" color={colors.textOnDark} accessibilityLabel="閉じる" onPress={() => goBackOr('/')} />
+          </View>
+        </View>
 
-        {mutation.isError && <Text style={styles.submitError}>{getErrorMessage(mutation.error)}</Text>}
-        <PrimaryButton
-          label={mutation.isPending ? 'ログイン中…' : 'ログイン'}
-          onPress={submit}
-          disabled={mutation.isPending}
-        />
+        <View style={styles.brand} accessible accessibilityRole="header" accessibilityLabel="はざい箱">
+          <Image
+            source={require('../../../assets/images/auth/logo-type.png')}
+            contentFit="contain"
+            style={styles.logoType}
+          />
+          <Image
+            source={require('../../../assets/images/auth/logo-mark.png')}
+            contentFit="contain"
+            style={styles.logoMark}
+          />
+        </View>
 
-        <View style={styles.switchRow}>
-          <Text style={styles.switchText}>アカウントをお持ちでない方は</Text>
-          <Link href="/register" replace style={styles.switchLink}>
-            新規登録
-          </Link>
+        <View style={styles.form}>
+          <FormInput
+            label="メールアドレス"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            inputMode="email"
+            error={errors.email}
+          />
+          <FormInput
+            label="パスワード"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoComplete="current-password"
+            onSubmitEditing={submit}
+            error={errors.password}
+          />
+
+          <View style={styles.actions}>
+            {mutation.isError && <Text style={styles.submitError}>{getErrorMessage(mutation.error)}</Text>}
+            <PrimaryButton
+              label={mutation.isPending ? 'ログイン中…' : 'ログイン'}
+              variant="secondary"
+              onPress={submit}
+              disabled={mutation.isPending}
+              style={[styles.button, styles.outlinedButton]}
+            />
+            <PrimaryButton
+              label="新規登録"
+              onPress={() => router.push('/register')}
+              style={styles.button}
+            />
+          </View>
+        </View>
+
+        <View style={styles.waveArea}>
+          <Image source={require('../../../assets/images/auth/wave.png')} contentFit="fill" style={styles.wave} />
         </View>
       </ScrollView>
     </Screen>
@@ -75,28 +117,66 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.xl,
+    flexGrow: 1,
+  },
+  corner: {
+    width: CORNER_WIDTH,
+    height: CORNER_HEIGHT,
+  },
+  cornerImage: {
+    ...StyleSheet.absoluteFill,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+  },
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.xxl,
+    paddingHorizontal: spacing.xl,
+  },
+  logoType: {
+    width: LOGO_TYPE_WIDTH,
+    aspectRatio: 646 / 294,
+    flexShrink: 1,
+  },
+  logoMark: {
+    width: LOGO_MARK_WIDTH,
+    aspectRatio: 305 / 336,
+  },
+  form: {
+    width: '100%',
+    maxWidth: FORM_MAX_WIDTH + layout.screenPaddingX * 2,
+    alignSelf: 'center',
+    gap: spacing.lg,
+    marginTop: spacing.xxxl,
     paddingHorizontal: layout.screenPaddingX,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xxxl,
+  },
+  actions: {
+    gap: spacing.lg,
+    marginTop: spacing.sm,
   },
   submitError: {
     ...typography.bodySmall,
     color: colors.danger,
     textAlign: 'center',
   },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
+  button: {
+    borderRadius: radius.xs,
   },
-  switchText: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
+  outlinedButton: {
+    borderWidth: 4,
   },
-  switchLink: {
-    ...typography.bodySmall,
-    ...fontWeights.bold,
-    color: colors.accent,
+  // 画面が縦に長いときは波を最下部に寄せる
+  waveArea: {
+    marginTop: 'auto',
+    paddingTop: spacing.xxl,
+  },
+  wave: {
+    width: '100%',
+    aspectRatio: 1026 / 511,
   },
 });

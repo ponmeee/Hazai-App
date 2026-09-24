@@ -7,7 +7,7 @@ export const PASSWORD_MIN_LENGTH = 8;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type LoginErrors = Partial<Record<'email' | 'password', string>>;
-export type RegisterErrors = Partial<Record<'email' | 'password' | 'name', string>>;
+export type RegisterErrors = Partial<Record<'email' | 'password' | 'name' | 'genre', string>>;
 
 const validateEmail = (email: string): string | undefined => {
   if (email.trim() === '') return 'メールアドレスを入力してください';
@@ -26,12 +26,18 @@ export const validateLogin = (email: string, password: string): LoginErrors =>
     password: password === '' ? 'パスワードを入力してください' : undefined,
   });
 
-export const validateRegister = (email: string, password: string, name: string): RegisterErrors =>
+export const validateRegister = (input: {
+  email: string;
+  password: string;
+  name: string;
+  genre: string;
+}): RegisterErrors =>
   dropEmpty({
-    email: validateEmail(email),
+    email: validateEmail(input.email),
     password:
-      password.length < PASSWORD_MIN_LENGTH
+      input.password.length < PASSWORD_MIN_LENGTH
         ? `パスワードは${PASSWORD_MIN_LENGTH}文字以上で入力してください`
         : undefined,
-    name: name.trim() === '' ? '名前を入力してください' : undefined,
+    name: input.name.trim() === '' ? 'ユーザーネームを入力してください' : undefined,
+    genre: input.genre.trim() === '' ? '属性を入力してください' : undefined,
   });

@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useSignInPromptOnLaunch } from '@/features/auth/useSignInPromptOnLaunch';
 import { CreateTabButton } from '@/features/create/components/CreateTabButton';
 import { colors, spacing, typography } from '@/theme';
 
@@ -34,6 +35,7 @@ const TAB_BAR_HEIGHT = 60;
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  useSignInPromptOnLaunch();
 
   return (
     <Tabs

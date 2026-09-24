@@ -113,7 +113,8 @@ npx expo start --web      # http://localhost:8081
 | `profiles` | `auth.users` と 1 対 1 のプロフィール。サインアップ時にトリガーで自動作成 |
 | `follows` | フォロー関係 |
 | `listings` / `listing_images` | 端材の出品と画像（1 商品 6 枚まで） |
-| `gallery_posts` / `gallery_images` | 作品投稿と画像（1 投稿 1〜4 枚）。出品とは独立 |
+| `gallery_posts` / `gallery_images` | 作品投稿と画像（1 投稿 1〜4 枚）。出品とは独立。投稿者は削除できる |
+| `gallery_likes` / `gallery_comments` | 作品へのいいね（本人のみ閲覧）とコメント（公開。削除はコメントした本人か作品の投稿者） |
 | `favorites` | お気に入り（ユーザー × 商品で一意） |
 | `cart_items` | カート（ユーザー × 商品で一意） |
 | `conversations` / `conversation_members` / `messages` | 商品についての 1 対 1 チャット |
@@ -122,7 +123,7 @@ npx expo start --web      # http://localhost:8081
 
 - すべてのテーブルで RLS を有効化し、`auth.uid()` で本人を判定しています。ブラウザから Supabase API を直接呼ばれても他人のデータは変更できません。
 - 所有者の列（`seller_id` / `user_id` / `sender_id` など）は DB の既定値 `auth.uid()` で決まり、**クライアントから値を送る権限自体を与えていません**（列単位の GRANT）。なりすましはできません。
-- お気に入り数（`listings.favorite_count`）はトリガーでのみ更新され、出品者も書き換えられません。
+- お気に入り数（`listings.favorite_count`）、いいね数・コメント数（`gallery_posts.like_count` / `comment_count`）はトリガーでのみ更新され、出品者・投稿者も書き換えられません。
 - 会話と参加者は `start_conversation()` でのみ作成でき、他人を勝手に会話へ追加できません。会話に参加していないユーザーはメッセージを取得・送信できません。
 - Storage は `{user_id}/...` のフォルダに分け、本人のフォルダ以外へは書き込み・削除できません。
 - 画像は公開 URL で配信します（バケットは public）。非公開にした商品の画像も、パスを知っていれば閲覧できる点に注意してください。
@@ -142,7 +143,7 @@ npx supabase gen types typescript --linked --schema public > src/lib/supabase/da
 ## 未実装・今後の対応
 
 - 決済・配送・本人確認（画面上は「準備中」表示）
-- いいね・コメント（件数は 0 表示）、フォローボタン
+- フォローボタン、コメントの編集
 - パスワードリセット画面（`src/features/auth/api.ts` に `resetPasswordForEmail` を追加し、`/auth/callback` で `PASSWORD_RECOVERY` を扱う想定）
 - 出品画像の差し替え（商品の編集は画像以外の項目のみ）
 - ネイティブアプリでの確認メールからの復帰（ディープリンク処理）

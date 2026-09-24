@@ -4,15 +4,23 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { colors, layout, radius, spacing, typography } from '@/theme';
 
-const MESSAGE_MAX_LENGTH = 1000;
+const DEFAULT_MAX_LENGTH = 1000;
 
 type MessageComposerProps = {
   isSending: boolean;
   /** 送信に成功したら true を返し、入力欄を空にする */
   onSend: (body: string) => Promise<boolean>;
+  /** 入力欄の案内文。読み上げのラベルにも使う */
+  placeholder?: string;
+  maxLength?: number;
 };
 
-export function MessageComposer({ isSending, onSend }: MessageComposerProps) {
+export function MessageComposer({
+  isSending,
+  onSend,
+  placeholder = 'メッセージを入力',
+  maxLength = DEFAULT_MAX_LENGTH,
+}: MessageComposerProps) {
   const [text, setText] = useState('');
   const canSend = text.trim() !== '' && !isSending;
 
@@ -26,11 +34,11 @@ export function MessageComposer({ isSending, onSend }: MessageComposerProps) {
       <TextInput
         value={text}
         onChangeText={setText}
-        placeholder="メッセージを入力"
+        placeholder={placeholder}
         placeholderTextColor={colors.textTertiary}
         multiline
-        maxLength={MESSAGE_MAX_LENGTH}
-        accessibilityLabel="メッセージ"
+        maxLength={maxLength}
+        accessibilityLabel={placeholder}
         style={styles.input}
       />
       <Pressable

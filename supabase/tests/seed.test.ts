@@ -27,4 +27,16 @@ test('デモデータがマイグレーション後のスキーマに投入で�
     tx.query<{ other_display_name: string }>('select other_display_name from public.get_my_conversations()'),
   );
   assert.deepEqual(conversations.rows.map((row) => row.other_display_name).sort(), ['山本 けんた', '高橋 さき']);
+
+  // いいね・コメントの件数がトリガーで作品に反映され、プロフィールの合計にも出る
+  const post = await h.as(null, (tx) =>
+    tx.query<{ like_count: number; comment_count: number }>(
+      `select like_count, comment_count from public.gallery_posts where id = 'd0000003-0000-4000-8000-000000000003'`,
+    ),
+  );
+  assert.deepEqual(post.rows[0], { like_count: 3, comment_count: 2 });
+  const stats = await h.as(null, (tx) =>
+    tx.query<{ like_count: number }>('select like_count from public.profile_stats where id = $1', [mio]),
+  );
+  assert.equal(stats.rows[0]?.like_count, 5);
 });

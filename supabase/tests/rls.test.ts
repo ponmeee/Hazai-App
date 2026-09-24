@@ -23,19 +23,25 @@ const count = async (tx: Transaction, sql: string, params: unknown[] = []) =>
 
 before(async () => {
   h = await setupDatabase();
-  seller = await h.createUser('seller@example.com', { display_name: '出品者', location: '長野県', genre: '木工' });
+  seller = await h.createUser('seller@example.com', {
+    display_name: '出品者',
+    location: '長野県',
+    genre: '木工',
+    bio: '端材で家具をつくっています',
+  });
   buyer = await h.createUser('buyer@example.com', { display_name: '購入者' });
   stranger = await h.createUser('stranger@example.com');
 });
 
 describe('profiles', () => {
   test('サインアップ時にプロフィールが作成される', async () => {
-    const profile = (await h.db.query<{ username: string; display_name: string; location: string }>(
-      'select username, display_name, location from public.profiles where id = $1',
+    const profile = (await h.db.query<{ username: string; display_name: string; location: string; bio: string }>(
+      'select username, display_name, location, bio from public.profiles where id = $1',
       [seller],
     )).rows[0];
     assert.equal(profile?.display_name, '出品者');
     assert.equal(profile?.location, '長野県');
+    assert.equal(profile?.bio, '端材で家具をつくっています');
     assert.match(profile?.username ?? '', /^seller_[0-9a-f]{8}$/);
     // 表示名が未指定ならメールアドレスから作る
     const fallback = (await h.db.query<{ display_name: string }>(
@@ -56,7 +62,7 @@ describe('profiles', () => {
     );
     assert.equal(updatedOther.affectedRows, 0);
     const bio = (await h.db.query<{ bio: string }>('select bio from public.profiles where id = $1', [seller])).rows[0];
-    assert.equal(bio?.bio, '');
+    assert.equal(bio?.bio, '端材で家具をつくっています');
   });
 
   test('アバターに他人のフォルダの画像は指定できない', async () => {

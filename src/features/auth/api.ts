@@ -15,6 +15,7 @@ export type RegisterInput = {
   name: string;
   location: string;
   genre: string;
+  bio: string;
 };
 
 export type ProfileInput = {
@@ -48,7 +49,12 @@ export async function signUp(input: RegisterInput): Promise<SignUpResult> {
     email: input.email,
     password: input.password,
     options: {
-      data: { display_name: input.name.trim(), location: input.location.trim(), genre: input.genre.trim() },
+      data: {
+        display_name: input.name.trim(),
+        location: input.location.trim(),
+        genre: input.genre.trim(),
+        bio: input.bio.trim(),
+      },
       emailRedirectTo: getEmailRedirectUrl(),
     },
   });
@@ -64,7 +70,7 @@ export async function signOut(): Promise<void> {
 export async function fetchAccount(user: Pick<User, 'id' | 'email'>): Promise<Account> {
   const [profile, stats] = await Promise.all([
     supabase.from('profiles').select(`${PROFILE_SUMMARY_COLUMNS}, bio` as const).eq('id', user.id).single(),
-    supabase.from('profile_stats').select('follower_count, following_count').eq('id', user.id).maybeSingle(),
+    supabase.from('profile_stats').select('follower_count, following_count, like_count').eq('id', user.id).maybeSingle(),
   ]);
   return toAccount(unwrap(profile), stats.data, user.email ?? '');
 }

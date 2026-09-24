@@ -5,6 +5,7 @@ import { getErrorMessage } from '@/api/errors';
 import { CategoryTag } from '@/components/CategoryTag';
 import { Header } from '@/components/Header';
 import { Notice } from '@/components/Notice';
+import { OwnerActionBar } from '@/components/OwnerActionBar';
 import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -12,7 +13,6 @@ import { useProductCart } from '@/features/cart/hooks';
 import { getCategoryName } from '@/features/categories/queries';
 import { useProductFavorite } from '@/features/favorites/hooks';
 import { useStartConversation } from '@/features/messages/hooks';
-import { OwnProductActions } from '@/features/products/components/OwnProductActions';
 import { ProductActionBar } from '@/features/products/components/ProductActionBar';
 import { ProductImageViewer } from '@/features/products/components/ProductImageViewer';
 import { ProductSpecList, type ProductSpec } from '@/features/products/components/ProductSpecList';
@@ -20,7 +20,7 @@ import { SellerCard } from '@/features/products/components/SellerCard';
 import { useDeleteProduct, useProduct } from '@/features/products/hooks';
 import { productConditionLabels, shippingMethodLabels } from '@/features/products/labels';
 import { useTransientMessage } from '@/hooks/useTransientMessage';
-import { colors, layout, spacing, typography } from '@/theme';
+import { colors, layout, shadows, spacing, typography } from '@/theme';
 import type { Product } from '@/types/models';
 import { formatPrice } from '@/utils/format';
 import { goBackOr } from '@/utils/navigation';
@@ -121,10 +121,16 @@ function ProductDetail({ product }: { product: Product }) {
           </View>
         )}
         {isOwnProduct ? (
-          <OwnProductActions
+          <OwnerActionBar
+            note="あなたが出品した商品です"
+            deleteLabel="出品を取り消す"
             isDeleting={deleteProduct.isPending}
-            onEdit={() => router.push({ pathname: '/products/[id]/edit', params: { id: product.id } })}
             onDelete={removeListing}
+            secondaryAction={{
+              label: '編集する',
+              onPress: () => router.push({ pathname: '/products/[id]/edit', params: { id: product.id } }),
+            }}
+            style={styles.ownerActions}
           />
         ) : (
           <ProductActionBar
@@ -183,6 +189,12 @@ const styles = StyleSheet.create({
   description: {
     ...typography.body,
     color: colors.textSecondary,
+  },
+  ownerActions: {
+    ...shadows.floating,
+    paddingHorizontal: layout.screenPaddingX,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.background,
   },
   noticeContainer: {
     position: 'absolute',

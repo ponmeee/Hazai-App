@@ -14,6 +14,7 @@ export const typography = {
   paragraph: { fontSize: 14, lineHeight: 21, ...fontWeights.regular },
   caption: { fontSize: 12, lineHeight: 16, ...fontWeights.regular },
   captionSmall: { fontSize: 11, lineHeight: 14, ...fontWeights.regular },
+  micro: { fontSize: 10, lineHeight: 13, ...fontWeights.regular },
   label: { fontSize: 13, lineHeight: 18, ...fontWeights.semiBold },
   price: { fontSize: 15, lineHeight: 20, ...fontWeights.bold },
 } as const satisfies Record<string, TextStyle>;

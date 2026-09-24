@@ -1,8 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { getCategoryName } from '@/features/categories/queries';
+import { usePostLike } from '@/features/gallery/hooks';
 import { colors, layout, radius, spacing, typography } from '@/theme';
 import type { GalleryPost } from '@/types/models';
 import { formatRelativeTime } from '@/utils/format';
@@ -16,6 +18,9 @@ import { PostAuthorMeta } from './PostAuthorMeta';
 
 type GalleryPostCardProps = {
   post: GalleryPost;
+  /** 作品詳細（コメント）画面へのリンクにするか。詳細画面の中では false */
+  linkToDetail?: boolean;
+  onLikeError?: (error: unknown) => void;
 };
 
 type CircleActionProps = {
@@ -41,10 +46,12 @@ function CircleAction({ icon, accessibilityLabel, color = colors.textPrimary, on
 }
 
 /** ギャラリーの作品カード。写真が複数枚あるときは横にスライドして切り替える */
-export function GalleryPostCard({ post }: GalleryPostCardProps) {
-  const [liked, setLiked] = useState(false);
+export function GalleryPostCard({ post, linkToDetail = true, onLikeError }: GalleryPostCardProps) {
+  const like = usePostLike(post.id);
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = post.imageUrls.length;
+
+  const openDetail = () => router.push({ pathname: '/posts/[id]', params: { id: post.id } });
 
   const sharePost = async () => {
     try {
@@ -70,33 +77,41 @@ export function GalleryPostCard({ post }: GalleryPostCardProps) {
 
         <View style={styles.bottomOverlay}>
           <PostAuthorMeta author={post.author} appearance="glass" />
-          <EngagementStrip
-            likeCount={post.likeCount + (liked ? 1 : 0)}
-            commentCount={post.commentCount}
-            liked={liked}
-          />
+          <EngagementStrip likeCount={post.likeCount} commentCount={post.commentCount} liked={like.isLiked} />
         </View>
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.title} numberOfLines={2}>
-          {post.title}
-        </Text>
-        {post.body !== '' && (
-          <Text style={styles.description} numberOfLines={3}>
-            {post.body}
+        <Pressable
+          onPress={linkToDetail ? openDetail : undefined}
+          disabled={!linkToDetail}
+          accessibilityRole={linkToDetail ? 'link' : undefined}
+          accessibilityLabel={linkToDetail ? `${post.title}の詳細とコメント` : undefined}
+          style={styles.text}
+        >
+          <Text style={styles.title} numberOfLines={linkToDetail ? 2 : undefined}>
+            {post.title}
           </Text>
-        )}
+          {post.body !== '' && (
+            <Text style={styles.description} numberOfLines={linkToDetail ? 3 : undefined}>
+              {post.body}
+            </Text>
+          )}
+        </Pressable>
         <View style={styles.footer}>
           <Text style={styles.time}>{formatRelativeTime(post.createdAt)}</Text>
           <View style={styles.actions}>
             <CircleAction
-              icon={liked ? 'heart' : 'heart-outline'}
-              color={liked ? colors.like : colors.textPrimary}
-              accessibilityLabel={liked ? 'いいねを取り消す' : 'いいね'}
-              onPress={() => setLiked((value) => !value)}
+              icon={like.isLiked ? 'heart' : 'heart-outline'}
+              color={like.isLiked ? colors.like : colors.textPrimary}
+              accessibilityLabel={like.isLiked ? 'いいねを取り消す' : 'いいね'}
+              onPress={() => like.toggle(onLikeError)}
             />
-            <CircleAction icon="chatbubble-outline" accessibilityLabel="コメント" />
+            <CircleAction
+              icon="chatbubble-outline"
+              accessibilityLabel="コメント"
+              onPress={linkToDetail ? openDetail : undefined}
+            />
             <CircleAction icon="share-outline" accessibilityLabel="シェア" onPress={sharePost} />
           </View>
         </View>
@@ -140,6 +155,9 @@ const styles = StyleSheet.create({
   body: {
     gap: spacing.md,
     padding: spacing.xl,
+  },
+  text: {
+    gap: spacing.md,
   },
   title: {
     ...typography.heading,
