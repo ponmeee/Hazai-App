@@ -74,11 +74,14 @@ export default function MyPageScreen() {
         title="マイページ"
         right={
           status === 'signedIn' && (
-            <IconButton
-              icon="chatbubbles-outline"
-              accessibilityLabel="メッセージ"
-              onPress={() => router.push('/messages')}
-            />
+            <View style={styles.headerActions}>
+              <IconButton icon="cart-outline" accessibilityLabel="カート" onPress={() => router.push('/cart')} />
+              <IconButton
+                icon="chatbubbles-outline"
+                accessibilityLabel="メッセージ"
+                onPress={() => router.push('/messages')}
+              />
+            </View>
           )
         }
       />
@@ -93,6 +96,10 @@ export default function MyPageScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerActions: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
   content: {
     gap: spacing.xl,
     paddingTop: spacing.xs,

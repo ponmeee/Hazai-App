@@ -1,7 +1,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
-import { getErrorMessage } from '@/api/client';
+import { getErrorMessage } from '@/api/errors';
 
 import { ErrorState } from './ErrorState';
 import { LoadingState } from './LoadingState';

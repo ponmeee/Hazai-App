@@ -6,10 +6,10 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { fetchFollowingUsers } from './api';
 
 export const useFollowingUsers = () => {
-  const { status } = useAuth();
+  const { account } = useAuth();
   return useQuery({
     queryKey: queryKeys.viewer.following,
-    queryFn: fetchFollowingUsers,
-    enabled: status === 'signedIn',
+    queryFn: () => fetchFollowingUsers(account?.id ?? ''),
+    enabled: account !== null,
   });
 };

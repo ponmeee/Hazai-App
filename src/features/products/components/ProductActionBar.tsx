@@ -7,16 +7,18 @@ import { colors, layout, radius, shadows, spacing } from '@/theme';
 type ProductActionBarProps = {
   isFavorite: boolean;
   isInCart: boolean;
+  isUpdatingCart: boolean;
   onToggleFavorite: () => void;
-  onAddToCart: () => void;
+  onToggleCart: () => void;
   onPurchase: () => void;
 };
 
 export function ProductActionBar({
   isFavorite,
   isInCart,
+  isUpdatingCart,
   onToggleFavorite,
-  onAddToCart,
+  onToggleCart,
   onPurchase,
 }: ProductActionBarProps) {
   return (
@@ -30,10 +32,10 @@ export function ProductActionBar({
         />
       </View>
       <PrimaryButton
-        label={isInCart ? 'カートに追加済み' : 'カートに追加'}
+        label={isInCart ? 'カートから外す' : 'カートに追加'}
         variant="secondary"
-        disabled={isInCart}
-        onPress={onAddToCart}
+        disabled={isUpdatingCart}
+        onPress={onToggleCart}
         style={styles.button}
       />
       <PrimaryButton label="購入する" onPress={onPurchase} style={styles.button} />

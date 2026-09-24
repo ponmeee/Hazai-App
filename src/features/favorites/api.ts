@@ -1,11 +1,21 @@
-import { apiRequest } from '@/api/client';
+import { toAppError, unwrap } from '@/api/errors';
+import { supabase } from '@/lib/supabase/client';
 
-const favoritePath = (productId: string): string => `/products/${encodeURIComponent(productId)}/favorite`;
+const UNIQUE_VIOLATION = '23505';
 
-export const fetchFavoriteProductIds = (): Promise<string[]> => apiRequest<string[]>('/me/favorite-product-ids');
+/** RLS により自分のお気に入りだけが返る */
+export async function fetchFavoriteProductIds(): Promise<string[]> {
+  const rows = unwrap(await supabase.from('favorites').select('listing_id').order('created_at', { ascending: false }));
+  return rows.map((row) => row.listing_id);
+}
 
-export const addFavorite = (productId: string): Promise<void> =>
-  apiRequest<void>(favoritePath(productId), { method: 'POST' });
+/** user_id は DB の既定値（auth.uid()）で決まるため送らない。登録済みなら成功とみなす */
+export async function addFavorite(listingId: string): Promise<void> {
+  const { error } = await supabase.from('favorites').insert({ listing_id: listingId });
+  if (error !== null && error.code !== UNIQUE_VIOLATION) throw toAppError(error);
+}
 
-export const removeFavorite = (productId: string): Promise<void> =>
-  apiRequest<void>(favoritePath(productId), { method: 'DELETE' });
+export async function removeFavorite(listingId: string): Promise<void> {
+  const { error } = await supabase.from('favorites').delete().eq('listing_id', listingId);
+  if (error !== null) throw toAppError(error);
+}

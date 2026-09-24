@@ -29,9 +29,9 @@ export const queryKeys = {
     all: ['viewer'] as const,
     following: ['viewer', 'following'] as const,
     favoriteProductIds: ['viewer', 'favoriteProductIds'] as const,
+    cart: ['viewer', 'cart'] as const,
     conversations: ['viewer', 'conversations'] as const,
     conversation: (id: string) => ['viewer', 'conversations', id] as const,
     messages: (conversationId: string) => ['viewer', 'messages', conversationId] as const,
   },
-  demoAccounts: ['dev', 'demoAccounts'] as const,
 };

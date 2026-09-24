@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { getErrorMessage } from '@/api/client';
+import { getErrorMessage } from '@/api/errors';
 
 type FormErrors<Values> = Partial<Record<keyof Values, string>>;
 

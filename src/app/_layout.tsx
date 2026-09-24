@@ -4,9 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { ErrorState } from '@/components/ErrorState';
+
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { RealtimeMessageSync } from '@/features/messages/RealtimeMessageSync';
 import { useAppFonts } from '@/hooks/useAppFonts';
+import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { colors, layout } from '@/theme';
 
 const createQueryClient = () =>
@@ -30,7 +33,10 @@ export default function RootLayout() {
         <View style={styles.backdrop}>
           <View style={styles.app}>
             {/* フォント読み込み前に描画すると、一瞬システムフォントで表示されてから切り替わるため待つ */}
-            {isFontReady && (
+            {!isSupabaseConfigured && (
+              <ErrorState message="Supabase の接続設定がありません。EXPO_PUBLIC_SUPABASE_URL と EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY を設定してください（MANUAL_SETUP.md 参照）。" />
+            )}
+            {isSupabaseConfigured && isFontReady && (
               <Stack
                 screenOptions={{
                   headerShown: false,

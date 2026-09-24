@@ -1,21 +1,35 @@
-import { apiRequest } from '@/api/client';
-import type { GalleryPostDto } from '@/api/dto';
-import { toGalleryPost } from '@/api/mappers';
+import { unwrap } from '@/api/errors';
+import { GALLERY_POST_SELECT, toGalleryPost } from '@/api/mappers';
 import type { GalleryPostFilter } from '@/api/queryKeys';
+import { supabase } from '@/lib/supabase/client';
 import type { CategorySlug, GalleryPost } from '@/types/models';
 
-export const fetchGalleryPosts = async ({ categorySlug, authorId }: GalleryPostFilter): Promise<GalleryPost[]> =>
-  (
-    await apiRequest<GalleryPostDto[]>('/gallery-posts', { query: { category: categorySlug, authorId } })
-  ).map(toGalleryPost);
+export async function fetchGalleryPosts({ categorySlug, authorId }: GalleryPostFilter): Promise<GalleryPost[]> {
+  let query = supabase.from('gallery_posts').select(GALLERY_POST_SELECT).order('created_at', { ascending: false });
+  if (categorySlug !== undefined) query = query.eq('category', categorySlug);
+  if (authorId !== undefined) query = query.eq('author_id', authorId);
+  return unwrap(await query).map(toGalleryPost);
+}
+
+async function fetchGalleryPost(id: string): Promise<GalleryPost> {
+  return toGalleryPost(unwrap(await supabase.from('gallery_posts').select(GALLERY_POST_SELECT).eq('id', id).single()));
+}
 
 export type NewGalleryPostInput = {
   title: string;
   body: string;
   categorySlug: CategorySlug;
-  /** サーバーへアップロード済みの画像パス。先頭が一覧に表示される */
-  imageUrls: string[];
 };
 
-export const createGalleryPost = async (input: NewGalleryPostInput): Promise<GalleryPost> =>
-  toGalleryPost(await apiRequest<GalleryPostDto>('/gallery-posts', { method: 'POST', body: input }));
+/** 作品と画像（Storage にアップロード済みのパス。先頭が一覧に表示される）を 1 トランザクションで登録する */
+export async function createGalleryPost(input: NewGalleryPostInput, imagePaths: string[]): Promise<GalleryPost> {
+  const id = unwrap(
+    await supabase.rpc('create_gallery_post', {
+      p_title: input.title,
+      p_description: input.body,
+      p_category: input.categorySlug,
+      p_image_paths: imagePaths,
+    }),
+  );
+  return fetchGalleryPost(id);
+}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 
-import { getErrorMessage } from '@/api/client';
+import { getErrorMessage } from '@/api/errors';
 import { CategoryChipList } from '@/components/CategoryChipList';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';

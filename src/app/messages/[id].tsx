@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useRef } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
-import { getErrorMessage } from '@/api/client';
+import { getErrorMessage } from '@/api/errors';
 import { EmptyState } from '@/components/EmptyState';
 import { Header } from '@/components/Header';
 import { QueryView } from '@/components/QueryView';

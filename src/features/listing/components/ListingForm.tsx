@@ -26,6 +26,8 @@ import { ImagePickerField } from './ImagePickerField';
 
 type ListingFormProps = Pick<ReturnType<typeof useListingForm>, 'values' | 'errors' | 'setField'> & {
   onImagePickError: (message: string) => void;
+  /** 編集時は画像の差し替えに未対応のため隠す */
+  showImageField?: boolean;
 };
 
 const categoryOptions = getCategoryOptions();
@@ -38,7 +40,7 @@ const shippingOptions = shippingMethods.map((method) => ({
   label: shippingMethodLabels[method],
 }));
 
-export function ListingForm({ values, errors, setField, onImagePickError }: ListingFormProps) {
+export function ListingForm({ values, errors, setField, onImagePickError, showImageField = true }: ListingFormProps) {
   const toggleShippingMethod = (method: ShippingMethod) => {
     const next = values.shippingMethods.includes(method)
       ? values.shippingMethods.filter((current) => current !== method)
@@ -48,13 +50,15 @@ export function ListingForm({ values, errors, setField, onImagePickError }: List
 
   return (
     <View style={styles.container}>
-      <ImagePickerField
-        images={values.images}
-        maxCount={MAX_LISTING_IMAGES}
-        error={errors.images}
-        onChange={(images) => setField('images', images)}
-        onPickError={onImagePickError}
-      />
+      {showImageField && (
+        <ImagePickerField
+          images={values.images}
+          maxCount={MAX_LISTING_IMAGES}
+          error={errors.images}
+          onChange={(images) => setField('images', images)}
+          onPickError={onImagePickError}
+        />
+      )}
 
       <FormInput
         label="商品名"

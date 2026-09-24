@@ -1,27 +1,29 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { getErrorMessage } from '@/api/client';
+import { getErrorMessage } from '@/api/errors';
 import { CategoryTag } from '@/components/CategoryTag';
 import { Header } from '@/components/Header';
 import { Notice } from '@/components/Notice';
 import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useProductCart } from '@/features/cart/hooks';
 import { getCategoryName } from '@/features/categories/queries';
 import { useProductFavorite } from '@/features/favorites/hooks';
 import { useStartConversation } from '@/features/messages/hooks';
+import { OwnProductActions } from '@/features/products/components/OwnProductActions';
 import { ProductActionBar } from '@/features/products/components/ProductActionBar';
 import { ProductImageViewer } from '@/features/products/components/ProductImageViewer';
 import { ProductSpecList, type ProductSpec } from '@/features/products/components/ProductSpecList';
 import { SellerCard } from '@/features/products/components/SellerCard';
-import { useProduct } from '@/features/products/hooks';
+import { useDeleteProduct, useProduct } from '@/features/products/hooks';
 import { productConditionLabels, shippingMethodLabels } from '@/features/products/labels';
 import { useTransientMessage } from '@/hooks/useTransientMessage';
 import { colors, layout, spacing, typography } from '@/theme';
 import type { Product } from '@/types/models';
 import { formatPrice } from '@/utils/format';
+import { goBackOr } from '@/utils/navigation';
 
 const buildSpecs = (product: Product): ProductSpec[] => [
   { label: 'サイズ', value: product.size ?? '-' },
@@ -38,7 +40,8 @@ function ProductDetail({ product }: { product: Product }) {
   const isOwnProduct = account?.id === product.seller.id;
 
   const favorite = useProductFavorite(product);
-  const [isInCart, setIsInCart] = useState(false);
+  const cart = useProductCart(product.id);
+  const deleteProduct = useDeleteProduct();
   const [notice, showNotice] = useTransientMessage();
   const startConversation = useStartConversation();
 
@@ -49,9 +52,18 @@ function ProductDetail({ product }: { product: Product }) {
     favorite.toggle((error) => showNotice(getErrorMessage(error)));
   };
 
-  const addToCart = () => {
-    setIsInCart(true);
-    showNotice('カートに追加しました');
+  const toggleCart = () => {
+    cart.toggle({
+      onSuccess: (inCart) => showNotice(inCart ? 'カートに追加しました' : 'カートから外しました'),
+      onError: (error) => showNotice(getErrorMessage(error)),
+    });
+  };
+
+  const removeListing = () => {
+    deleteProduct.mutate(product.id, {
+      onSuccess: () => goBackOr('/mypage'),
+      onError: (error) => showNotice(getErrorMessage(error)),
+    });
   };
 
   const contactSeller = () => {
@@ -109,13 +121,18 @@ function ProductDetail({ product }: { product: Product }) {
           </View>
         )}
         {isOwnProduct ? (
-          <Text style={styles.ownProductNote}>あなたが出品した商品です</Text>
+          <OwnProductActions
+            isDeleting={deleteProduct.isPending}
+            onEdit={() => router.push({ pathname: '/products/[id]/edit', params: { id: product.id } })}
+            onDelete={removeListing}
+          />
         ) : (
           <ProductActionBar
             isFavorite={favorite.isFavorite}
-            isInCart={isInCart}
+            isInCart={cart.isInCart}
+            isUpdatingCart={cart.isUpdating}
             onToggleFavorite={toggleFavorite}
-            onAddToCart={addToCart}
+            onToggleCart={toggleCart}
             onPurchase={() => showNotice('決済機能は準備中です')}
           />
         )}
@@ -175,13 +192,5 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     pointerEvents: 'none',
     zIndex: 1,
-  },
-  ownProductNote: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    paddingVertical: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
   },
 });

@@ -1,8 +1,8 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { queryKeys, type ProductListFilter } from '@/api/queryKeys';
 
-import { fetchPopularProducts, fetchProduct, fetchProducts } from './api';
+import { deleteProduct, fetchPopularProducts, fetchProduct, fetchProducts } from './api';
 
 export const useProducts = (filter: ProductListFilter) =>
   useQuery({
@@ -23,3 +23,14 @@ export const useProduct = (id: string) =>
     queryKey: queryKeys.products.detail(id),
     queryFn: () => fetchProduct(id),
   });
+
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: (_result, id) => {
+      queryClient.removeQueries({ queryKey: queryKeys.products.detail(id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+    },
+  });
+};

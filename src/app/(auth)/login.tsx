@@ -3,13 +3,12 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { getErrorMessage } from '@/api/client';
+import { getErrorMessage } from '@/api/errors';
 import { FormInput } from '@/components/FormInput';
 import { Header } from '@/components/Header';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { DemoAccountList } from '@/features/auth/components/DemoAccountList';
 import { leaveAuthScreen } from '@/features/auth/navigation';
 import { validateLogin, type LoginErrors } from '@/features/auth/validation';
 import { colors, fontWeights, layout, spacing, typography } from '@/theme';
@@ -69,11 +68,6 @@ export default function LoginScreen() {
             新規登録
           </Link>
         </View>
-
-        <DemoAccountList
-          disabled={mutation.isPending}
-          onSelect={(demoEmail, demoPassword) => mutation.mutate({ email: demoEmail, password: demoPassword })}
-        />
       </ScrollView>
     </Screen>
   );

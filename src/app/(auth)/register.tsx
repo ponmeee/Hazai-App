@@ -1,13 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { getErrorMessage } from '@/api/client';
+import { getErrorMessage } from '@/api/errors';
 import { FormInput } from '@/components/FormInput';
 import { Header } from '@/components/Header';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
+import { SuccessState } from '@/components/SuccessState';
 import type { RegisterInput } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { leaveAuthScreen } from '@/features/auth/navigation';
@@ -20,8 +21,18 @@ export default function RegisterScreen() {
   const { signUp } = useAuth();
   const [input, setInput] = useState<RegisterInput>(initialInput);
   const [errors, setErrors] = useState<RegisterErrors>({});
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
 
-  const mutation = useMutation({ mutationFn: signUp, onSuccess: leaveAuthScreen });
+  const mutation = useMutation({
+    mutationFn: signUp,
+    onSuccess: (result, submitted) => {
+      if (result.needsEmailConfirmation) {
+        setConfirmationEmail(submitted.email);
+      } else {
+        leaveAuthScreen();
+      }
+    },
+  });
 
   const setField = (key: keyof RegisterInput) => (value: string) =>
     setInput((current) => ({ ...current, [key]: value }));
@@ -31,6 +42,20 @@ export default function RegisterScreen() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length === 0) mutation.mutate({ ...input, email: input.email.trim() });
   };
+
+  if (confirmationEmail !== null) {
+    return (
+      <Screen edges={['top', 'bottom']}>
+        <Header showBack title="新規登録" />
+        <SuccessState
+          title="確認メールを送信しました"
+          description={`${confirmationEmail} に届いたメールのリンクを開くと、登録が完了してログインできます。`}
+          primaryAction={{ label: 'ログイン画面へ', onPress: () => router.replace('/login') }}
+          secondaryAction={{ label: 'ホームへ戻る', onPress: () => router.replace('/') }}
+        />
+      </Screen>
+    );
+  }
 
   return (
     <Screen edges={['top', 'bottom']}>

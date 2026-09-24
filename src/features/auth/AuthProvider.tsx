@@ -1,12 +1,12 @@
+import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
-import { ApiError, setAuthToken, setUnauthorizedHandler } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase/client';
 import type { Account } from '@/types/models';
 
 import * as authApi from './api';
-import { tokenStorage } from './tokenStorage';
 
 type AuthState =
   | { status: 'loading'; account: null }
@@ -15,7 +15,7 @@ type AuthState =
 
 type AuthContextValue = AuthState & {
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (input: authApi.RegisterInput) => Promise<void>;
+  signUp: (input: authApi.RegisterInput) => Promise<authApi.SignUpResult>;
   signOut: () => Promise<void>;
   setAccount: (account: Account) => void;
 };
@@ -26,74 +26,65 @@ const signedOut: AuthState = { status: 'signedOut', account: null };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [state, setState] = useState<AuthState>({ status: 'loading', account: null });
-
-  // 別のアカウントのデータが残らないよう、本人に固有のキャッシュはセッションが変わるたびに捨てる
-  const resetViewerCache = useCallback(
-    () => queryClient.removeQueries({ queryKey: queryKeys.viewer.all }),
-    [queryClient],
+  const [state, setState] = useState<AuthState>(
+    isSupabaseConfigured ? { status: 'loading', account: null } : signedOut,
   );
+  // トークン更新のたびにプロフィールを読み直さないよう、読み込み済みのユーザーを覚えておく
+  const loadedUserIdRef = useRef<string | null>(null);
 
-  const clearSession = useCallback(async () => {
-    setAuthToken(null);
-    await tokenStorage.remove();
-    resetViewerCache();
-    setState(signedOut);
-  }, [resetViewerCache]);
+  const applySession = useCallback(
+    async (session: Session | null) => {
+      const userId = session?.user.id ?? null;
+      if (userId === loadedUserIdRef.current && userId !== null) return;
 
-  const startSession = useCallback(
-    async ({ token, account }: authApi.AuthSession) => {
-      setAuthToken(token);
-      await tokenStorage.set(token);
-      resetViewerCache();
-      setState({ status: 'signedIn', account });
-    },
-    [resetViewerCache],
-  );
+      // 別のアカウントのデータが残らないよう、本人に固有のキャッシュはユーザーが変わるたびに捨てる
+      queryClient.removeQueries({ queryKey: queryKeys.viewer.all });
+      loadedUserIdRef.current = userId;
 
-  useEffect(() => {
-    setUnauthorizedHandler(() => void clearSession());
-    return () => setUnauthorizedHandler(null);
-  }, [clearSession]);
-
-  useEffect(() => {
-    const restoreSession = async () => {
-      const token = await tokenStorage.get();
-      if (token === null) {
+      if (session === null) {
         setState(signedOut);
         return;
       }
-      setAuthToken(token);
       try {
-        setState({ status: 'signedIn', account: await authApi.fetchAccount() });
-      } catch (error) {
-        // サーバーに繋がらないだけならトークンは残し、次回起動時に復元を再試行する
-        if (error instanceof ApiError && error.status === 401) {
-          await clearSession();
-        } else {
-          setAuthToken(null);
-          setState(signedOut);
-        }
+        setState({ status: 'signedIn', account: await authApi.fetchAccount(session.user) });
+      } catch {
+        // 次のセッション通知で読み直せるよう、読み込み済みの印を外す
+        loadedUserIdRef.current = null;
+        setState(signedOut);
       }
-    };
-    void restoreSession();
-  }, [clearSession]);
+    },
+    [queryClient],
+  );
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    // 初回は保存済みセッション（INITIAL_SESSION）が通知される。
+    // コールバック内で Supabase の他の API を待つとデッドロックするため、処理は次のタスクへ回す
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setTimeout(() => void applySession(session), 0);
+    });
+    return () => data.subscription.unsubscribe();
+  }, [applySession]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       ...state,
-      signIn: async (email, password) => startSession(await authApi.login(email, password)),
-      signUp: async (input) => startSession(await authApi.register(input)),
+      signIn: async (email, password) => applySession(await authApi.signIn(email, password)),
+      signUp: async (input) => {
+        const result = await authApi.signUp(input);
+        if (result.session !== null) await applySession(result.session);
+        return result;
+      },
       signOut: async () => {
         try {
-          await authApi.logout();
+          await authApi.signOut();
         } finally {
-          await clearSession();
+          await applySession(null);
         }
       },
       setAccount: (account) => setState({ status: 'signedIn', account }),
     }),
-    [state, startSession, clearSession],
+    [state, applySession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
