@@ -3,8 +3,9 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
-import type { GalleryPostView } from '@/features/gallery/queries';
+import { getCategoryName } from '@/features/categories/queries';
 import { colors, layout, radius, spacing, typography } from '@/theme';
+import type { GalleryPost } from '@/types/models';
 import { formatNumber } from '@/utils/format';
 
 import { CategoryTag } from './CategoryTag';
@@ -12,7 +13,7 @@ import { IconButton, type IoniconName } from './IconButton';
 import { UserAvatar } from './UserAvatar';
 
 type GalleryPostCardProps = {
-  post: GalleryPostView;
+  post: GalleryPost;
 };
 
 type CountActionProps = {
@@ -66,7 +67,7 @@ export function GalleryPostCard({ post }: GalleryPostCardProps) {
       <View>
         <Image source={{ uri: post.imageUrl }} contentFit="cover" transition={200} style={styles.image} />
         <View style={styles.tagOverlay}>
-          <CategoryTag label={post.categoryName} />
+          <CategoryTag label={getCategoryName(post.categorySlug)} />
         </View>
       </View>
 

@@ -2,10 +2,10 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { UserAvatar } from '@/components/UserAvatar';
 import { colors, layout, spacing, typography } from '@/theme';
-import type { User } from '@/types/models';
+import type { UserSummary } from '@/types/models';
 
 type FollowingUserListProps = {
-  users: User[];
+  users: UserSummary[];
 };
 
 export function FollowingUserList({ users }: FollowingUserListProps) {

@@ -15,7 +15,7 @@ export function ProductImageViewer({ imageUrls, productName }: ProductImageViewe
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: imageUrls[selectedIndex] }}
+        source={imageUrls[selectedIndex] ?? null}
         accessibilityLabel={productName}
         contentFit="cover"
         transition={150}

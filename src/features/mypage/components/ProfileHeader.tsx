@@ -2,23 +2,23 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { UserAvatar } from '@/components/UserAvatar';
 import { colors, layout, radius, spacing, typography } from '@/theme';
-import type { User } from '@/types/models';
+import type { UserProfile } from '@/types/models';
 
 type ProfileHeaderProps = {
-  user: User;
+  user: UserProfile;
   onEdit: () => void;
 };
 
 export function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
+  const meta = [user.location, user.genre].filter((value) => value !== '').join(' / ');
+
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
         <UserAvatar uri={user.avatarUrl} size={72} name={user.name} />
         <View style={styles.identity}>
           <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.meta}>
-            {user.location} / {user.genre}
-          </Text>
+          {meta !== '' && <Text style={styles.meta}>{meta}</Text>}
         </View>
         <Pressable
           onPress={onEdit}
@@ -29,7 +29,7 @@ export function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
           <Text style={styles.editLabel}>編集</Text>
         </Pressable>
       </View>
-      <Text style={styles.bio}>{user.bio}</Text>
+      {user.bio !== '' && <Text style={styles.bio}>{user.bio}</Text>}
     </View>
   );
 }

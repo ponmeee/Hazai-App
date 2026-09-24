@@ -2,15 +2,16 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import type { GalleryPostView } from '@/features/gallery/queries';
+import { getCategoryName } from '@/features/categories/queries';
 import { colors, radius, spacing, typography } from '@/theme';
+import type { GalleryPost } from '@/types/models';
 import { formatNumber } from '@/utils/format';
 
 import { CategoryTag } from './CategoryTag';
 import { UserAvatar } from './UserAvatar';
 
 type GalleryPostTileProps = {
-  post: GalleryPostView;
+  post: GalleryPost;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -21,7 +22,7 @@ export function GalleryPostTile({ post, style }: GalleryPostTileProps) {
       <View>
         <Image source={{ uri: post.imageUrl }} contentFit="cover" transition={200} style={styles.image} />
         <View style={styles.tagOverlay}>
-          <CategoryTag label={post.categoryName} />
+          <CategoryTag label={getCategoryName(post.categorySlug)} />
         </View>
       </View>
       <Text style={styles.title} numberOfLines={1}>

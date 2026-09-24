@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
@@ -17,12 +18,13 @@ export function ProductCard({ product, style }: ProductCardProps) {
       <Pressable accessibilityLabel={`${product.name} ${formatPrice(product.price)}`} style={style}>
         {({ pressed }) => (
           <View style={[styles.container, pressed && styles.pressed]}>
-            <Image
-              source={{ uri: product.imageUrls[0] }}
-              contentFit="cover"
-              transition={200}
-              style={styles.image}
-            />
+            {product.imageUrls[0] === undefined ? (
+              <View style={[styles.image, styles.noImage]}>
+                <Ionicons name="image-outline" size={28} color={colors.textTertiary} />
+              </View>
+            ) : (
+              <Image source={product.imageUrls[0]} contentFit="cover" transition={200} style={styles.image} />
+            )}
             <View style={styles.body}>
               <Text style={styles.name} numberOfLines={1}>
                 {product.name}
@@ -48,6 +50,10 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
+  },
+  noImage: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   body: {
     gap: spacing.xxs,

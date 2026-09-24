@@ -4,22 +4,24 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Header } from '@/components/Header';
 import { IconButton } from '@/components/IconButton';
+import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
 import { SearchBar } from '@/components/SearchBar';
 import { SectionHeader } from '@/components/SectionHeader';
+import { homeHeroImageUrl } from '@/constants/categories';
 import { getCategories } from '@/features/categories/queries';
 import { CategoryGrid } from '@/features/home/components/CategoryGrid';
 import { HomeHero } from '@/features/home/components/HomeHero';
 import { Logo } from '@/features/home/components/Logo';
 import { PopularProducts } from '@/features/home/components/PopularProducts';
-import { getHomeHeroImageUrl } from '@/features/home/queries';
-import { getPopularProducts } from '@/features/products/queries';
+import { usePopularProducts } from '@/features/products/hooks';
 import { layout, spacing } from '@/theme';
 
 const POPULAR_PRODUCT_LIMIT = 8;
 
 export default function HomeScreen() {
   const [keyword, setKeyword] = useState('');
+  const popularProducts = usePopularProducts(POPULAR_PRODUCT_LIMIT);
 
   const searchProducts = () => {
     router.push({ pathname: '/buy', params: { q: keyword.trim() } });
@@ -36,7 +38,7 @@ export default function HomeScreen() {
           <View style={styles.search}>
             <SearchBar value={keyword} onChangeText={setKeyword} onSubmit={searchProducts} />
           </View>
-          <HomeHero imageUrl={getHomeHeroImageUrl()} />
+          <HomeHero imageUrl={homeHeroImageUrl} />
         </View>
 
         <View style={styles.section}>
@@ -46,7 +48,9 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <SectionHeader title="人気の商品" actionHref="/buy" />
-          <PopularProducts products={getPopularProducts(POPULAR_PRODUCT_LIMIT)} />
+          <QueryView query={popularProducts}>
+            {(products) => <PopularProducts products={products} />}
+          </QueryView>
         </View>
       </ScrollView>
     </Screen>

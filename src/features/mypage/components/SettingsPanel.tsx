@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
+import { router, type Href } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
@@ -10,12 +11,12 @@ const webSwitchProps: object = Platform.OS === 'web' ? { activeThumbColor: color
 
 type NotificationKey = 'favoriteMaterials' | 'messages' | 'recommendations';
 
-const accountItems = [
-  'プロフィール編集',
-  'メールアドレス・パスワード変更',
-  '配送先住所',
-  '購入履歴',
-  '本人確認',
+const accountItems: { label: string; href?: Href }[] = [
+  { label: 'プロフィール編集', href: '/profile/edit' },
+  { label: 'メールアドレス・パスワード変更' },
+  { label: '配送先住所' },
+  { label: '購入履歴' },
+  { label: '本人確認' },
 ];
 
 const notificationItems: { key: NotificationKey; label: string }[] = [
@@ -79,8 +80,13 @@ export function SettingsPanel({ onSelectItem, onLogout }: SettingsPanelProps) {
   return (
     <View style={styles.container}>
       <SettingsSection title="アカウント">
-        {accountItems.map((label, index) => (
-          <SettingsRow key={label} label={label} isFirst={index === 0} onPress={() => onSelectItem(label)} />
+        {accountItems.map(({ label, href }, index) => (
+          <SettingsRow
+            key={label}
+            label={label}
+            isFirst={index === 0}
+            onPress={() => (href === undefined ? onSelectItem(label) : router.push(href))}
+          />
         ))}
       </SettingsSection>
 

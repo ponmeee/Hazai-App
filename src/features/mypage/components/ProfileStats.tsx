@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, layout, radius, spacing, typography } from '@/theme';
-import type { User } from '@/types/models';
+import type { UserProfile } from '@/types/models';
 import { formatNumber } from '@/utils/format';
 
 type ProfileStatsProps = {
-  user: User;
+  user: UserProfile;
 };
 
 export function ProfileStats({ user }: ProfileStatsProps) {

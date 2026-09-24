@@ -1,6 +1,7 @@
 import type { Category } from '@/types/models';
 
-import { unsplash } from './image';
+const unsplash = (photoId: string, width: number): string =>
+  `https://images.unsplash.com/photo-${photoId}?w=${width}&q=75&auto=format&fit=crop`;
 
 export const categories: Category[] = [
   { slug: 'wood', name: '木材', heroImageUrl: unsplash('1589939705384-5185137a7f0f', 1200) },

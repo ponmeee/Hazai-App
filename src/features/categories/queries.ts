@@ -1,4 +1,4 @@
-import { categories } from '@/mocks/categories';
+import { categories } from '@/constants/categories';
 import type { Category, CategorySlug } from '@/types/models';
 
 export const getCategories = (): Category[] => categories;

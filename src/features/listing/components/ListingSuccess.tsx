@@ -5,20 +5,18 @@ import { PrimaryButton } from '@/components/PrimaryButton';
 import { colors, layout, spacing, typography } from '@/theme';
 
 type ListingSuccessProps = {
-  onViewProducts: () => void;
+  onViewProduct: () => void;
   onListAnother: () => void;
 };
 
-export function ListingSuccess({ onViewProducts, onListAnother }: ListingSuccessProps) {
+export function ListingSuccess({ onViewProduct, onListAnother }: ListingSuccessProps) {
   return (
     <View style={styles.container}>
       <Ionicons name="checkmark-circle" size={56} color={colors.success} />
-      <Text style={styles.title}>出品を受け付けました</Text>
-      <Text style={styles.description}>
-        デモ版のため、入力内容は保存されていません。{'\n'}実際の出品はアカウント機能の公開後に利用できます。
-      </Text>
+      <Text style={styles.title}>出品しました</Text>
+      <Text style={styles.description}>「かう」や各カテゴリの一覧に表示されます。</Text>
       <View style={styles.actions}>
-        <PrimaryButton label="商品一覧へ" onPress={onViewProducts} />
+        <PrimaryButton label="出品した商品を見る" onPress={onViewProduct} />
         <PrimaryButton label="続けて出品する" variant="secondary" onPress={onListAnother} />
       </View>
     </View>

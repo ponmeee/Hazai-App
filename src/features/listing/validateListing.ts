@@ -7,8 +7,14 @@ export const DESCRIPTION_MAX_LENGTH = 1000;
 const PRICE_MIN = 1;
 const PRICE_MAX = 9_999_999;
 
+/** プレビュー用の uri と、アップロード用の base64 を併せて持つ */
+export type ListingImage = {
+  uri: string;
+  base64: string;
+};
+
 export type ListingFormValues = {
-  imageUris: string[];
+  images: ListingImage[];
   name: string;
   categorySlug: CategorySlug | null;
   size: string;
@@ -23,7 +29,7 @@ export type ListingFormValues = {
 export type ListingFormErrors = Partial<Record<keyof ListingFormValues, string>>;
 
 export const initialListingFormValues: ListingFormValues = {
-  imageUris: [],
+  images: [],
   name: '',
   categorySlug: null,
   size: '',
@@ -78,8 +84,8 @@ export const validateListing = (values: ListingFormValues): ListingFormErrors =>
     errors.shippingMethods = '配送方法を1つ以上選択してください';
   }
 
-  if (values.imageUris.length > MAX_LISTING_IMAGES) {
-    errors.imageUris = `画像は${MAX_LISTING_IMAGES}枚までです`;
+  if (values.images.length > MAX_LISTING_IMAGES) {
+    errors.images = `画像は${MAX_LISTING_IMAGES}枚までです`;
   }
 
   return errors;

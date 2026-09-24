@@ -17,7 +17,9 @@ import { DESCRIPTION_MAX_LENGTH, MAX_LISTING_IMAGES, NAME_MAX_LENGTH } from '../
 import { ChipSelector } from './ChipSelector';
 import { ImagePickerField } from './ImagePickerField';
 
-type ListingFormProps = Pick<ReturnType<typeof useListingForm>, 'values' | 'errors' | 'setField'>;
+type ListingFormProps = Pick<ReturnType<typeof useListingForm>, 'values' | 'errors' | 'setField'> & {
+  onImagePickError: (message: string) => void;
+};
 
 const categoryOptions = getCategories().map((category) => ({
   value: category.slug,
@@ -32,7 +34,7 @@ const shippingOptions = shippingMethods.map((method) => ({
   label: shippingMethodLabels[method],
 }));
 
-export function ListingForm({ values, errors, setField }: ListingFormProps) {
+export function ListingForm({ values, errors, setField, onImagePickError }: ListingFormProps) {
   const toggleShippingMethod = (method: ShippingMethod) => {
     const next = values.shippingMethods.includes(method)
       ? values.shippingMethods.filter((current) => current !== method)
@@ -43,10 +45,11 @@ export function ListingForm({ values, errors, setField }: ListingFormProps) {
   return (
     <View style={styles.container}>
       <ImagePickerField
-        imageUris={values.imageUris}
+        images={values.images}
         maxCount={MAX_LISTING_IMAGES}
-        error={errors.imageUris}
-        onChange={(uris) => setField('imageUris', uris)}
+        error={errors.images}
+        onChange={(images) => setField('images', images)}
+        onPickError={onImagePickError}
       />
 
       <FormInput

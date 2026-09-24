@@ -6,7 +6,8 @@ import type { Category } from '@/types/models';
 
 type CategoryHeroProps = {
   category: Category;
-  productCount: number;
+  /** 読み込み中は undefined */
+  productCount?: number;
 };
 
 export function CategoryHero({ category, productCount }: CategoryHeroProps) {
@@ -20,7 +21,7 @@ export function CategoryHero({ category, productCount }: CategoryHeroProps) {
       />
       <View style={styles.overlay}>
         <Text style={styles.name}>{category.name}</Text>
-        <Text style={styles.count}>出品数 {productCount}件</Text>
+        <Text style={styles.count}>出品数 {productCount ?? '–'}件</Text>
       </View>
     </View>
   );

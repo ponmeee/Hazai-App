@@ -6,32 +6,40 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { FormField } from '@/components/FormField';
 import { colors, radius, spacing, typography } from '@/theme';
 
+import type { ListingImage } from '../validateListing';
+
 type ImagePickerFieldProps = {
-  imageUris: string[];
+  images: ListingImage[];
   maxCount: number;
   error?: string;
-  onChange: (imageUris: string[]) => void;
+  onChange: (images: ListingImage[]) => void;
+  onPickError: (message: string) => void;
 };
 
-export function ImagePickerField({ imageUris, maxCount, error, onChange }: ImagePickerFieldProps) {
-  const remaining = maxCount - imageUris.length;
+export function ImagePickerField({ images, maxCount, error, onChange, onPickError }: ImagePickerFieldProps) {
+  const remaining = maxCount - images.length;
 
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsMultipleSelection: true,
       selectionLimit: remaining,
-      quality: 0.8,
+      quality: 0.7,
+      // アップロードを Web・ネイティブ共通の JSON で行うため base64 で受け取る
+      base64: true,
     });
     if (result.canceled) return;
-    const picked = result.assets.map((asset) => asset.uri);
-    onChange([...imageUris, ...picked].slice(0, maxCount));
+    const picked = result.assets.flatMap((asset) =>
+      typeof asset.base64 === 'string' ? [{ uri: asset.uri, base64: asset.base64 }] : [],
+    );
+    if (picked.length < result.assets.length) onPickError('読み込めなかった画像があります');
+    onChange([...images, ...picked].slice(0, maxCount));
   };
 
-  const removeImage = (uri: string) => onChange(imageUris.filter((current) => current !== uri));
+  const removeImage = (uri: string) => onChange(images.filter((image) => image.uri !== uri));
 
   return (
-    <FormField label={`商品画像（${imageUris.length}/${maxCount}）`} error={error} hint="1枚目が一覧に表示されます">
+    <FormField label={`商品画像（${images.length}/${maxCount}）`} error={error} hint="1枚目が一覧に表示されます">
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
         {remaining > 0 && (
           <Pressable
@@ -44,7 +52,7 @@ export function ImagePickerField({ imageUris, maxCount, error, onChange }: Image
             <Text style={styles.addLabel}>追加</Text>
           </Pressable>
         )}
-        {imageUris.map((uri, index) => (
+        {images.map(({ uri }, index) => (
           <View key={uri} style={styles.tile}>
             <Image source={{ uri }} contentFit="cover" style={styles.image} />
             <Pressable

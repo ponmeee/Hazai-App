@@ -3,26 +3,35 @@ import { StyleSheet, Text, View } from 'react-native';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { UserAvatar } from '@/components/UserAvatar';
 import { colors, radius, spacing, typography } from '@/theme';
-import type { User } from '@/types/models';
+import type { UserSummary } from '@/types/models';
 
 type SellerCardProps = {
-  seller: User;
-  onContact: () => void;
+  seller: UserSummary;
+  /** 自分の出品では問い合わせボタンを出さないため省略できる */
+  onContact?: () => void;
+  isContacting?: boolean;
 };
 
-export function SellerCard({ seller, onContact }: SellerCardProps) {
+export function SellerCard({ seller, onContact, isContacting = false }: SellerCardProps) {
+  const meta = [seller.location, seller.genre].filter((value) => value !== '').join(' / ');
+
   return (
     <View style={styles.container}>
       <View style={styles.profile}>
         <UserAvatar uri={seller.avatarUrl} size={48} name={seller.name} />
         <View style={styles.text}>
           <Text style={styles.name}>{seller.name}</Text>
-          <Text style={styles.meta}>
-            {seller.location} / {seller.genre}
-          </Text>
+          {meta !== '' && <Text style={styles.meta}>{meta}</Text>}
         </View>
       </View>
-      <PrimaryButton label="出品者へ問い合わせる" variant="secondary" onPress={onContact} />
+      {onContact !== undefined && (
+        <PrimaryButton
+          label={isContacting ? '準備中…' : '出品者へ問い合わせる'}
+          variant="secondary"
+          disabled={isContacting}
+          onPress={onContact}
+        />
+      )}
     </View>
   );
 }

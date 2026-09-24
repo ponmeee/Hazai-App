@@ -1,20 +1,22 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { getErrorMessage } from '@/api/client';
 import { CategoryTag } from '@/components/CategoryTag';
-import { EmptyState } from '@/components/EmptyState';
 import { Header } from '@/components/Header';
 import { Notice } from '@/components/Notice';
+import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { getCategoryName } from '@/features/categories/queries';
+import { useStartConversation } from '@/features/messages/hooks';
 import { ProductActionBar } from '@/features/products/components/ProductActionBar';
 import { ProductImageViewer } from '@/features/products/components/ProductImageViewer';
 import { ProductSpecList, type ProductSpec } from '@/features/products/components/ProductSpecList';
 import { SellerCard } from '@/features/products/components/SellerCard';
+import { useProduct } from '@/features/products/hooks';
 import { productConditionLabels, shippingMethodLabels } from '@/features/products/labels';
-import { getProductById } from '@/features/products/queries';
-import { getUserById } from '@/features/users/queries';
 import { useTransientMessage } from '@/hooks/useTransientMessage';
 import { colors, layout, spacing, typography } from '@/theme';
 import type { Product } from '@/types/models';
@@ -23,30 +25,21 @@ import { formatPrice } from '@/utils/format';
 const buildSpecs = (product: Product): ProductSpec[] => [
   { label: 'サイズ', value: product.size ?? '-' },
   { label: '重量', value: product.weight ?? '-' },
-  { label: '状態', value: productConditionLabels[product.condition] },
+  { label: '状態', value: product.condition === null ? '-' : productConditionLabels[product.condition] },
   {
     label: '配送方法',
     value: product.shippingMethods.map((method) => shippingMethodLabels[method]).join('・'),
   },
 ];
 
-export default function ProductDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const product = getProductById(id);
-  const seller = product === undefined ? undefined : getUserById(product.sellerId);
+function ProductDetail({ product }: { product: Product }) {
+  const { status, account } = useAuth();
+  const isOwnProduct = account?.id === product.seller.id;
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   const [notice, showNotice] = useTransientMessage();
-
-  if (product === undefined) {
-    return (
-      <Screen>
-        <Header showBack />
-        <EmptyState title="商品が見つかりません" description="削除されたか、URLが正しくない可能性があります。" />
-      </Screen>
-    );
-  }
+  const startConversation = useStartConversation();
 
   const toggleFavorite = () => {
     showNotice(isFavorite ? 'お気に入りを解除しました' : 'お気に入りに追加しました');
@@ -58,9 +51,23 @@ export default function ProductDetailScreen() {
     showNotice('カートに追加しました');
   };
 
+  const contactSeller = () => {
+    if (status !== 'signedIn') {
+      router.push('/login');
+      return;
+    }
+    startConversation.mutate(
+      { userId: product.seller.id, productId: product.id },
+      {
+        onSuccess: (conversation) =>
+          router.push({ pathname: '/messages/[id]', params: { id: conversation.id } }),
+        onError: (error) => showNotice(getErrorMessage(error)),
+      },
+    );
+  };
+
   return (
-    <Screen edges={['top', 'bottom']}>
-      <Header showBack title="商品詳細" />
+    <>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ProductImageViewer imageUrls={product.imageUrls} productName={product.name} />
 
@@ -81,15 +88,14 @@ export default function ProductDetailScreen() {
             <ProductSpecList specs={buildSpecs(product)} />
           </View>
 
-          {seller !== undefined && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>出品者</Text>
-              <SellerCard
-                seller={seller}
-                onContact={() => showNotice('メッセージ機能は準備中です')}
-              />
-            </View>
-          )}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>出品者</Text>
+            <SellerCard
+              seller={product.seller}
+              onContact={isOwnProduct ? undefined : contactSeller}
+              isContacting={startConversation.isPending}
+            />
+          </View>
         </View>
       </ScrollView>
 
@@ -99,14 +105,30 @@ export default function ProductDetailScreen() {
             <Notice message={notice} />
           </View>
         )}
-        <ProductActionBar
-          isFavorite={isFavorite}
-          isInCart={isInCart}
-          onToggleFavorite={toggleFavorite}
-          onAddToCart={addToCart}
-          onPurchase={() => showNotice('決済機能は準備中です')}
-        />
+        {isOwnProduct ? (
+          <Text style={styles.ownProductNote}>あなたが出品した商品です</Text>
+        ) : (
+          <ProductActionBar
+            isFavorite={isFavorite}
+            isInCart={isInCart}
+            onToggleFavorite={toggleFavorite}
+            onAddToCart={addToCart}
+            onPurchase={() => showNotice('決済機能は準備中です')}
+          />
+        )}
       </View>
+    </>
+  );
+}
+
+export default function ProductDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const productQuery = useProduct(id);
+
+  return (
+    <Screen edges={['top', 'bottom']}>
+      <Header showBack title="商品詳細" />
+      <QueryView query={productQuery}>{(product) => <ProductDetail product={product} />}</QueryView>
     </Screen>
   );
 }
@@ -150,5 +172,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     pointerEvents: 'none',
     zIndex: 1,
+  },
+  ownProductNote: {
+    ...typography.bodySmall,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    paddingVertical: spacing.lg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
 });

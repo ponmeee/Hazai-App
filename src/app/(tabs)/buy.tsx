@@ -6,12 +6,14 @@ import { CategoryChipList } from '@/components/CategoryChipList';
 import { EmptyState } from '@/components/EmptyState';
 import { Header } from '@/components/Header';
 import { ProductCard } from '@/components/ProductCard';
+import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
 import { SearchBar } from '@/components/SearchBar';
 import { TwoColumnGrid } from '@/components/TwoColumnGrid';
 import { getCategories } from '@/features/categories/queries';
 import { SellButton } from '@/features/products/components/SellButton';
-import { getProducts } from '@/features/products/queries';
+import { useProducts } from '@/features/products/hooks';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { colors, layout, spacing, typography } from '@/theme';
 import type { CategorySlug } from '@/types/models';
 
@@ -27,7 +29,8 @@ export default function BuyScreen() {
     setKeyword(q);
   }
 
-  const products = getProducts({ categorySlug: selectedCategory ?? undefined, keyword });
+  const debouncedKeyword = useDebouncedValue(keyword.trim());
+  const productsQuery = useProducts({ categorySlug: selectedCategory ?? undefined, keyword: debouncedKeyword });
 
   return (
     <Screen>
@@ -44,19 +47,25 @@ export default function BuyScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.resultCount}>{products.length}件</Text>
-        {products.length === 0 ? (
-          <EmptyState
-            title="該当する端材がありません"
-            description="キーワードやカテゴリを変えて探してみてください。"
-          />
-        ) : (
-          <TwoColumnGrid
-            items={products}
-            keyExtractor={(product) => product.id}
-            renderItem={(product) => <ProductCard product={product} />}
-          />
-        )}
+        <QueryView query={productsQuery}>
+          {(products) => (
+            <>
+              <Text style={styles.resultCount}>{products.length}件</Text>
+              {products.length === 0 ? (
+                <EmptyState
+                  title="該当する端材がありません"
+                  description="キーワードやカテゴリを変えて探してみてください。"
+                />
+              ) : (
+                <TwoColumnGrid
+                  items={products}
+                  keyExtractor={(product) => product.id}
+                  renderItem={(product) => <ProductCard product={product} />}
+                />
+              )}
+            </>
+          )}
+        </QueryView>
       </ScrollView>
     </Screen>
   );

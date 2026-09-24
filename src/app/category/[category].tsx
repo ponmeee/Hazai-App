@@ -5,67 +5,78 @@ import { EmptyState } from '@/components/EmptyState';
 import { GalleryPostTile } from '@/components/GalleryPostTile';
 import { Header } from '@/components/Header';
 import { ProductCard } from '@/components/ProductCard';
+import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
 import { SectionHeader } from '@/components/SectionHeader';
 import { TwoColumnGrid } from '@/components/TwoColumnGrid';
 import { CategoryHero } from '@/features/categories/components/CategoryHero';
 import { getCategoryBySlug } from '@/features/categories/queries';
-import { getGalleryPosts } from '@/features/gallery/queries';
-import { getProducts } from '@/features/products/queries';
+import { useGalleryPosts } from '@/features/gallery/hooks';
+import { useProducts } from '@/features/products/hooks';
 import { layout, spacing } from '@/theme';
+import type { Category } from '@/types/models';
+
+function CategoryContent({ category }: { category: Category }) {
+  const productsQuery = useProducts({ categorySlug: category.slug });
+  const postsQuery = useGalleryPosts({ categorySlug: category.slug });
+
+  return (
+    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <CategoryHero category={category} productCount={productsQuery.data?.length} />
+
+      <View style={styles.section}>
+        <SectionHeader title="ギャラリー" actionHref="/gallery" />
+        <QueryView query={postsQuery}>
+          {(posts) =>
+            posts.length === 0 ? (
+              <EmptyState title="まだ作品がありません" />
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.galleryList}
+              >
+                {posts.map((post) => (
+                  <GalleryPostTile key={post.id} post={post} style={styles.galleryTile} />
+                ))}
+              </ScrollView>
+            )
+          }
+        </QueryView>
+      </View>
+
+      <View style={styles.section}>
+        <SectionHeader title="出品された端材" />
+        <QueryView query={productsQuery}>
+          {(products) =>
+            products.length === 0 ? (
+              <EmptyState title="まだ出品がありません" />
+            ) : (
+              <TwoColumnGrid
+                items={products}
+                keyExtractor={(product) => product.id}
+                renderItem={(product) => <ProductCard product={product} />}
+              />
+            )
+          }
+        </QueryView>
+      </View>
+    </ScrollView>
+  );
+}
 
 export default function CategoryScreen() {
   const { category: slug } = useLocalSearchParams<{ category: string }>();
   const category = getCategoryBySlug(slug);
 
-  if (category === undefined) {
-    return (
-      <Screen>
-        <Header showBack />
-        <EmptyState title="カテゴリが見つかりません" />
-      </Screen>
-    );
-  }
-
-  const products = getProducts({ categorySlug: category.slug });
-  const posts = getGalleryPosts(category.slug);
-
   return (
     <Screen>
-      <Header showBack title={category.name} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <CategoryHero category={category} productCount={products.length} />
-
-        <View style={styles.section}>
-          <SectionHeader title="ギャラリー" actionHref="/gallery" />
-          {posts.length === 0 ? (
-            <EmptyState title="まだ作品がありません" />
-          ) : (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.galleryList}
-            >
-              {posts.map((post) => (
-                <GalleryPostTile key={post.id} post={post} style={styles.galleryTile} />
-              ))}
-            </ScrollView>
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <SectionHeader title="出品された端材" />
-          {products.length === 0 ? (
-            <EmptyState title="まだ出品がありません" />
-          ) : (
-            <TwoColumnGrid
-              items={products}
-              keyExtractor={(product) => product.id}
-              renderItem={(product) => <ProductCard product={product} />}
-            />
-          )}
-        </View>
-      </ScrollView>
+      <Header showBack title={category?.name} />
+      {category === undefined ? (
+        <EmptyState title="カテゴリが見つかりません" />
+      ) : (
+        <CategoryContent category={category} />
+      )}
     </Screen>
   );
 }

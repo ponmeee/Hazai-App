@@ -14,16 +14,24 @@ export type Category = {
   heroImageUrl: string;
 };
 
-export type User = {
+export type UserSummary = {
   id: string;
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   location: string;
   genre: string;
+};
+
+export type UserProfile = UserSummary & {
   bio: string;
   followerCount: number;
   followingCount: number;
   likeCount: number;
+};
+
+/** ログイン中の本人の情報 */
+export type Account = UserProfile & {
+  email: string;
 };
 
 export type ProductCondition = 'new' | 'likeNew' | 'good' | 'fair' | 'poor';
@@ -38,13 +46,13 @@ export type Product = {
   categorySlug: CategorySlug;
   imageUrls: string[];
   description: string;
-  size?: string;
-  weight?: string;
-  condition: ProductCondition;
+  size: string | null;
+  weight: string | null;
+  condition: ProductCondition | null;
   shippingMethods: ShippingMethod[];
-  sellerId: string;
   favoriteCount: number;
   createdAt: string;
+  seller: UserSummary;
 };
 
 export type GalleryPost = {
@@ -53,8 +61,24 @@ export type GalleryPost = {
   body: string;
   imageUrl: string;
   categorySlug: CategorySlug;
-  authorId: string;
   likeCount: number;
   commentCount: number;
   createdAt: string;
+  author: UserSummary;
+};
+
+export type Message = {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+  createdAt: string;
+};
+
+export type Conversation = {
+  id: string;
+  otherUser: UserSummary;
+  product: { id: string; name: string; price: number; imageUrl: string | null } | null;
+  lastMessage: Message | null;
+  updatedAt: string;
 };

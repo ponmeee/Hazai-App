@@ -1,8 +1,8 @@
-import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, layout, typography } from '@/theme';
+import { goBackOr } from '@/utils/navigation';
 
 import { IconButton } from './IconButton';
 
@@ -13,21 +13,12 @@ type HeaderProps = {
   right?: ReactNode;
 };
 
-const goBack = () => {
-  // Web で詳細URLを直接開いた場合は戻り先の履歴がないためホームへ戻す
-  if (router.canGoBack()) {
-    router.back();
-  } else {
-    router.replace('/');
-  }
-};
-
 export function Header({ title, showBack = false, left, right }: HeaderProps) {
   if (showBack) {
     return (
       <View style={styles.container}>
         <View style={styles.side}>
-          <IconButton icon="chevron-back" accessibilityLabel="戻る" onPress={goBack} />
+          <IconButton icon="chevron-back" accessibilityLabel="戻る" onPress={() => goBackOr('/')} />
         </View>
         <Text style={styles.centerTitle} numberOfLines={1}>
           {title}
