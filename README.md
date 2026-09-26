@@ -14,13 +14,13 @@
 
 ## 技術構成
 
-| 領域 | 使用技術 |
-| --- | --- |
-| アプリ | Expo SDK 57 / React Native 0.86 / expo-router / TypeScript |
-| データ取得 | @supabase/supabase-js + TanStack Query |
-| バックエンド | Supabase（Auth / PostgreSQL / Storage / Realtime） |
-| 公開 | Vercel（`expo export --platform web` の静的出力を配信） |
-| DB テスト | PGlite（WASM 版 PostgreSQL）+ node:test |
+| 領域         | 使用技術                                                   |
+| ------------ | ---------------------------------------------------------- |
+| アプリ       | Expo SDK 57 / React Native 0.86 / expo-router / TypeScript |
+| データ取得   | @supabase/supabase-js + TanStack Query                     |
+| バックエンド | Supabase（Auth / PostgreSQL / Storage / Realtime）         |
+| 公開         | Vercel（`expo export --platform web` の静的出力を配信）    |
+| DB テスト    | PGlite（WASM 版 PostgreSQL）+ node:test                    |
 
 ## ディレクトリ構成
 
@@ -51,19 +51,19 @@ npx expo start --web      # http://localhost:8081
 
 ### コマンド
 
-| コマンド | 内容 |
-| --- | --- |
-| `npm run web` | Web 版の開発サーバー |
-| `npm run typecheck` | アプリと DB テストの型チェック |
-| `npm run lint` | ESLint |
-| `npm run test:db` | マイグレーションを PostgreSQL（PGlite）に適用し、RLS・トリガー・型定義の整合性を検証（Docker 不要） |
-| `npx expo export --platform web` | 本番ビルド（`dist/` に出力。Vercel と同じ処理） |
+| コマンド                         | 内容                                                                                                |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `npm run web`                    | Web 版の開発サーバー                                                                                |
+| `npm run typecheck`              | アプリと DB テストの型チェック                                                                      |
+| `npm run lint`                   | ESLint                                                                                              |
+| `npm run test:db`                | マイグレーションを PostgreSQL（PGlite）に適用し、RLS・トリガー・型定義の整合性を検証（Docker 不要） |
+| `npx expo export --platform web` | 本番ビルド（`dist/` に出力。Vercel と同じ処理）                                                     |
 
 ## 環境変数
 
-| 変数名 | 内容 | 公開してよいか |
-| --- | --- | --- |
-| `EXPO_PUBLIC_SUPABASE_URL` | Supabase の Project URL | はい |
+| 変数名                                 | 内容                                    | 公開してよいか                   |
+| -------------------------------------- | --------------------------------------- | -------------------------------- |
+| `EXPO_PUBLIC_SUPABASE_URL`             | Supabase の Project URL                 | はい                             |
 | `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key（`sb_publishable_...`） | はい（RLS で保護する前提のキー） |
 
 - `EXPO_PUBLIC_` の値は**ビルド時にアプリへ埋め込まれ、ブラウザから見えます**。Secret key（`sb_secret_...`）や `service_role` key は絶対に設定しないでください。
@@ -86,9 +86,9 @@ npx expo start --web      # http://localhost:8081
 
 **Supabase Dashboard → Authentication → URL Configuration**
 
-| 項目 | 設定値の例 |
-| --- | --- |
-| Site URL | `https://example.vercel.app`（Vercel の本番 URL） |
+| 項目          | 設定値の例                                                                                                                                                                                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Site URL      | `https://example.vercel.app`（Vercel の本番 URL）                                                                                                                                                                          |
 | Redirect URLs | `https://example.vercel.app/**`<br>`http://localhost:8081/**`（ローカル開発）<br>`https://*-<Vercel のチーム名>.vercel.app/**`（プレビューデプロイも確認メールを使う場合）<br>`hazaibako://**`（将来のネイティブアプリ用） |
 
 確認メールのリンクは `<Site URL のドメイン>/auth/callback` に戻ります（`emailRedirectTo` はアプリが実行中のオリジンから組み立てるため、そのオリジンが Redirect URLs に含まれている必要があります）。
@@ -99,25 +99,25 @@ npx expo start --web      # http://localhost:8081
 
 マイグレーション（`supabase/migrations/`）だけで再構築できます。Dashboard での手作業は不要です。
 
-| ファイル | 内容 |
-| --- | --- |
-| `..._initial_schema.sql` | テーブル・制約・インデックス・トリガー・RPC・GRANT |
-| `..._rls_policies.sql` | 全テーブルの Row Level Security |
-| `..._storage.sql` | Storage バケット（`avatars` / `listing-images` / `gallery-images`）とポリシー |
-| `..._realtime.sql` | `messages` の Realtime 配信 |
+| ファイル                 | 内容                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `..._initial_schema.sql` | テーブル・制約・インデックス・トリガー・RPC・GRANT                            |
+| `..._rls_policies.sql`   | 全テーブルの Row Level Security                                               |
+| `..._storage.sql`        | Storage バケット（`avatars` / `listing-images` / `gallery-images`）とポリシー |
+| `..._realtime.sql`       | `messages` の Realtime 配信                                                   |
 
 ### テーブル
 
-| テーブル | 内容 |
-| --- | --- |
-| `profiles` | `auth.users` と 1 対 1 のプロフィール。サインアップ時にトリガーで自動作成 |
-| `follows` | フォロー関係 |
-| `listings` / `listing_images` | 端材の出品と画像（1 商品 6 枚まで） |
-| `gallery_posts` / `gallery_images` | 作品投稿と画像（1 投稿 1〜4 枚）。出品とは独立。投稿者は削除できる |
-| `gallery_likes` / `gallery_comments` | 作品へのいいね（本人のみ閲覧）とコメント（公開。削除はコメントした本人か作品の投稿者） |
-| `favorites` | お気に入り（ユーザー × 商品で一意） |
-| `cart_items` | カート（ユーザー × 商品で一意） |
-| `conversations` / `conversation_members` / `messages` | 商品についての 1 対 1 チャット |
+| テーブル                                              | 内容                                                                                   |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `profiles`                                            | `auth.users` と 1 対 1 のプロフィール。サインアップ時にトリガーで自動作成              |
+| `follows`                                             | フォロー関係                                                                           |
+| `listings` / `listing_images`                         | 端材の出品と画像（1 商品 6 枚まで）                                                    |
+| `gallery_posts` / `gallery_images`                    | 作品投稿と画像（1 投稿 1〜4 枚）。出品とは独立。投稿者は削除できる                     |
+| `gallery_likes` / `gallery_comments`                  | 作品へのいいね（本人のみ閲覧）とコメント（公開。削除はコメントした本人か作品の投稿者） |
+| `favorites`                                           | お気に入り（ユーザー × 商品で一意）                                                    |
+| `cart_items`                                          | カート（ユーザー × 商品で一意）                                                        |
+| `conversations` / `conversation_members` / `messages` | 商品についての 1 対 1 チャット                                                         |
 
 ### セキュリティの方針
 
@@ -130,7 +130,7 @@ npx expo start --web      # http://localhost:8081
 
 これらは `npm run test:db` で自動検証しています（他人の商品を編集できない、会話外のユーザーがメッセージを読めない、他人の Storage に書き込めない など）。
 
-### DB 型定義
+### DB 型定義 aaaiueokakikuke
 
 `src/lib/supabase/database.types.ts` はマイグレーションに対応する型定義です。スキーマを変更したら再生成してください。
 
