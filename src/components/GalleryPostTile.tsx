@@ -4,6 +4,7 @@ import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { getCategoryName } from '@/features/categories/queries';
+import { postDetailHref, type PostFeed } from '@/features/gallery/navigation';
 import { colors, radius, spacing, typography } from '@/theme';
 import type { GalleryPost } from '@/types/models';
 import { formatNumber } from '@/utils/format';
@@ -14,12 +15,14 @@ import { UserAvatar } from './UserAvatar';
 type GalleryPostTileProps = {
   post: GalleryPost;
   style?: StyleProp<ViewStyle>;
+  /** 作品詳細で前後にスライドするときの並び（開いた元の一覧の条件） */
+  feed?: PostFeed;
 };
 
 /** カテゴリ詳細やマイページで使う、ギャラリー投稿のコンパクト表示。押すと作品詳細を開く */
-export function GalleryPostTile({ post, style }: GalleryPostTileProps) {
+export function GalleryPostTile({ post, style, feed }: GalleryPostTileProps) {
   return (
-    <Link href={{ pathname: '/posts/[id]', params: { id: post.id } }} asChild>
+    <Link href={postDetailHref(post.id, feed)} asChild>
       <Pressable accessibilityLabel={`${post.title}の詳細`} style={style}>
         {({ pressed }) => (
           <View style={[styles.container, pressed && styles.pressed]}>

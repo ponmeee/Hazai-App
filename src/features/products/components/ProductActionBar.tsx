@@ -8,6 +8,8 @@ type ProductActionBarProps = {
   isFavorite: boolean;
   isInCart: boolean;
   isUpdatingCart: boolean;
+  /** 売り切れのときはカート・購入の代わりに「売り切れ」を表示する */
+  isSoldOut: boolean;
   onToggleFavorite: () => void;
   onToggleCart: () => void;
   onPurchase: () => void;
@@ -17,6 +19,7 @@ export function ProductActionBar({
   isFavorite,
   isInCart,
   isUpdatingCart,
+  isSoldOut,
   onToggleFavorite,
   onToggleCart,
   onPurchase,
@@ -31,14 +34,20 @@ export function ProductActionBar({
           onPress={onToggleFavorite}
         />
       </View>
-      <PrimaryButton
-        label={isInCart ? 'カートから外す' : 'カートに追加'}
-        variant="secondary"
-        disabled={isUpdatingCart}
-        onPress={onToggleCart}
-        style={styles.button}
-      />
-      <PrimaryButton label="購入する" onPress={onPurchase} style={styles.button} />
+      {isSoldOut ? (
+        <PrimaryButton label="売り切れ" onPress={onPurchase} disabled style={styles.button} />
+      ) : (
+        <>
+          <PrimaryButton
+            label={isInCart ? 'カートから外す' : 'カートに追加'}
+            variant="secondary"
+            disabled={isUpdatingCart}
+            onPress={onToggleCart}
+            style={styles.button}
+          />
+          <PrimaryButton label="購入する" onPress={onPurchase} style={styles.button} />
+        </>
+      )}
     </View>
   );
 }

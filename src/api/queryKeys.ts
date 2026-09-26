@@ -3,6 +3,8 @@ import type { CategorySlug } from '@/types/models';
 export type ProductListFilter = {
   categorySlug?: CategorySlug;
   keyword?: string;
+  tags?: string[];
+  sellerId?: string;
 };
 
 export type GalleryPostFilter = {
@@ -21,20 +23,30 @@ export const queryKeys = {
     all: ['products'] as const,
     list: (filter: ProductListFilter) => ['products', 'list', filter] as const,
     popular: (limit: number) => ['products', 'popular', limit] as const,
+    byIds: (ids: string[]) => ['products', 'byIds', ids] as const,
     detail: (id: string) => ['products', 'detail', id] as const,
   },
   galleryPosts: {
     all: ['galleryPosts'] as const,
     list: (filter: GalleryPostFilter) => ['galleryPosts', filter] as const,
+    relatedToProduct: (productId: string) => ['galleryPosts', 'relatedToProduct', productId] as const,
     detail: (id: string) => ['galleryPosts', 'detail', id] as const,
   },
   // 作品の一覧・詳細（galleryPosts）とは形が異なるため、別の接頭辞にしてまとめて書き換える対象から外す
   galleryComments: (postId: string) => ['galleryComments', postId] as const,
+  galleryMaterials: (postId: string) => ['galleryMaterials', postId] as const,
+  users: {
+    all: ['users'] as const,
+    profile: (userId: string) => ['users', 'profile', userId] as const,
+    followers: (userId: string) => ['users', 'followers', userId] as const,
+    following: (userId: string) => ['users', 'following', userId] as const,
+  },
   viewer: {
     all: ['viewer'] as const,
     following: ['viewer', 'following'] as const,
     favoriteProductIds: ['viewer', 'favoriteProductIds'] as const,
     cart: ['viewer', 'cart'] as const,
+    orders: ['viewer', 'orders'] as const,
     likedPostIds: ['viewer', 'likedPostIds'] as const,
     conversations: ['viewer', 'conversations'] as const,
     conversation: (id: string) => ['viewer', 'conversations', id] as const,

@@ -23,3 +23,9 @@ export const formatRelativeTime = (iso: string, now: Date = new Date()): string 
   if (days < 7) return `${days}日前`;
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };
+
+/** 「2026年9月26日」（端末のタイムゾーンで表示） */
+export const formatDate = (iso: string): string => {
+  const date = new Date(iso);
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+};

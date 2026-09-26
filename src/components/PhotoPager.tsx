@@ -1,13 +1,19 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   View,
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  type ViewStyle,
 } from 'react-native';
+
+// Web では入れ子の横スクロールが端で外側へ連鎖し、最後の写真からさらにスライドすると前後の作品へ移ってしまうため止める。
+// overscroll-behavior は react-native-web だけが解釈し、RN の型定義にはない
+const containHorizontalScroll = (Platform.OS === 'web' ? { overscrollBehaviorX: 'contain' } : {}) as ViewStyle;
 
 type PhotoPagerProps = {
   uris: string[];
@@ -36,6 +42,7 @@ export function PhotoPager({ uris, accessibilityLabel, onIndexChange }: PhotoPag
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        style={containHorizontalScroll}
       >
         {uris.map((uri, index) => (
           <Image

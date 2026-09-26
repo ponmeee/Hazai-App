@@ -1,18 +1,17 @@
+import { router } from 'expo-router';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { getErrorMessage } from '@/api/errors';
 import { EmptyState } from '@/components/EmptyState';
 import { Header } from '@/components/Header';
-import { Notice } from '@/components/Notice';
-import { PrimaryButton } from '@/components/PrimaryButton';
 import { QueryView } from '@/components/QueryView';
 import { Screen } from '@/components/Screen';
 import { RequireAuth } from '@/features/auth/components/RequireAuth';
 import { CartItemRow } from '@/features/cart/components/CartItemRow';
 import { useCartItems, useRemoveFromCart } from '@/features/cart/hooks';
+import { CheckoutFooter } from '@/features/orders/components/CheckoutFooter';
 import { useTransientMessage } from '@/hooks/useTransientMessage';
-import { colors, layout, shadows, spacing, typography } from '@/theme';
-import { formatPrice } from '@/utils/format';
+import { colors, layout, spacing, typography } from '@/theme';
 
 function CartContent() {
   const cartQuery = useCartItems();
@@ -22,7 +21,17 @@ function CartContent() {
   return (
     <QueryView query={cartQuery}>
       {(items) => {
-        const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+        // 他の人に先に購入された商品はカートに残るが、購入の対象からは外す
+        const purchasable = items.filter((item) => item.product.status === 'active');
+        const soldOutCount = items.length - purchasable.length;
+        const total = purchasable.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+        const goToCheckout = () =>
+          router.push({
+            pathname: '/checkout',
+            params: { ids: purchasable.map((item) => item.product.id).join(',') },
+          });
+
         return (
           <>
             <FlatList
@@ -40,19 +49,26 @@ function CartContent() {
                 />
               )}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ListHeaderComponent={
+                soldOutCount > 0 ? (
+                  <Text style={styles.soldOutNote}>
+                    売り切れの商品が{soldOutCount}点あります。売り切れの商品は購入できません。
+                  </Text>
+                ) : null
+              }
               ListEmptyComponent={
                 <EmptyState title="カートは空です" description="気になる端材を「カートに追加」してみましょう。" />
               }
             />
             {items.length > 0 && (
-              <View style={styles.footer}>
-                {notice !== null && <Notice message={notice} />}
-                <View style={styles.totalRow}>
-                  <Text style={styles.totalLabel}>合計（{items.length}点）</Text>
-                  <Text style={styles.totalPrice}>{formatPrice(total)}</Text>
-                </View>
-                <PrimaryButton label="購入手続きへ" onPress={() => showNotice('決済機能は準備中です')} />
-              </View>
+              <CheckoutFooter
+                itemCount={purchasable.length}
+                totalPrice={total}
+                buttonLabel="まとめて購入手続きへ"
+                onPress={goToCheckout}
+                disabled={purchasable.length === 0}
+                message={notice}
+              />
             )}
           </>
         );
@@ -76,24 +92,10 @@ const styles = StyleSheet.create({
     marginHorizontal: layout.screenPaddingX,
     backgroundColor: colors.divider,
   },
-  footer: {
-    ...shadows.floating,
-    gap: spacing.md,
+  soldOutNote: {
+    ...typography.caption,
+    color: colors.danger,
     paddingHorizontal: layout.screenPaddingX,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.background,
-  },
-  totalRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-  },
-  totalLabel: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-  },
-  totalPrice: {
-    ...typography.title,
-    color: colors.textPrimary,
+    paddingTop: spacing.md,
   },
 });

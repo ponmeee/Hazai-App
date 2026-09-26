@@ -5,6 +5,7 @@ import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { getCategoryName } from '@/features/categories/queries';
 import { usePostLike } from '@/features/gallery/hooks';
+import { postDetailHref, type PostFeed } from '@/features/gallery/navigation';
 import { colors, layout, radius, spacing, typography } from '@/theme';
 import type { GalleryPost } from '@/types/models';
 import { formatRelativeTime } from '@/utils/format';
@@ -20,6 +21,8 @@ type GalleryPostCardProps = {
   post: GalleryPost;
   /** 作品詳細（コメント）画面へのリンクにするか。詳細画面の中では false */
   linkToDetail?: boolean;
+  /** 作品詳細で前後にスライドするときの並び（開いた元の一覧の条件） */
+  feed?: PostFeed;
   onLikeError?: (error: unknown) => void;
 };
 
@@ -46,12 +49,12 @@ function CircleAction({ icon, accessibilityLabel, color = colors.textPrimary, on
 }
 
 /** ギャラリーの作品カード。写真が複数枚あるときは横にスライドして切り替える */
-export function GalleryPostCard({ post, linkToDetail = true, onLikeError }: GalleryPostCardProps) {
+export function GalleryPostCard({ post, linkToDetail = true, feed, onLikeError }: GalleryPostCardProps) {
   const like = usePostLike(post.id);
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = post.imageUrls.length;
 
-  const openDetail = () => router.push({ pathname: '/posts/[id]', params: { id: post.id } });
+  const openDetail = () => router.push(postDetailHref(post.id, feed));
 
   const sharePost = async () => {
     try {
@@ -76,8 +79,17 @@ export function GalleryPostCard({ post, linkToDetail = true, onLikeError }: Gall
         )}
 
         <View style={styles.bottomOverlay}>
-          <PostAuthorMeta author={post.author} appearance="glass" />
-          <EngagementStrip likeCount={post.likeCount} commentCount={post.commentCount} liked={like.isLiked} />
+          <Pressable
+            onPress={() => router.push({ pathname: '/users/[id]', params: { id: post.author.id } })}
+            accessibilityRole="link"
+            accessibilityLabel={`${post.author.name}のプロフィール`}
+            style={({ pressed }) => [styles.author, pressed && styles.pressed]}
+          >
+            <PostAuthorMeta author={post.author} appearance="glass" />
+          </Pressable>
+          <View style={styles.passThrough}>
+            <EngagementStrip likeCount={post.likeCount} commentCount={post.commentCount} liked={like.isLiked} />
+          </View>
         </View>
       </View>
 
@@ -149,7 +161,14 @@ const styles = StyleSheet.create({
     right: spacing.lg,
     bottom: spacing.lg,
     gap: spacing.md,
-    // 写真のスライド操作をこの領域越しにも受け付ける
+    // 投稿者の表示だけを押せるようにし、それ以外は写真のスライド操作を下へ通す
+    pointerEvents: 'box-none',
+  },
+  author: {
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
+  },
+  passThrough: {
     pointerEvents: 'none',
   },
   body: {

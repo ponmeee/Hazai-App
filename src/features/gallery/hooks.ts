@@ -10,8 +10,10 @@ import {
   deleteComment,
   deleteGalleryPost,
   fetchComments,
+  fetchGalleryMaterials,
   fetchGalleryPost,
   fetchGalleryPosts,
+  fetchPostsRelatedToProduct,
   fetchLikedPostIds,
   likePost,
   unlikePost,
@@ -29,6 +31,20 @@ export const useGalleryPost = (id: string) =>
   useQuery({
     queryKey: queryKeys.galleryPosts.detail(id),
     queryFn: () => fetchGalleryPost(id),
+  });
+
+export const useGalleryMaterials = (postId: string) =>
+  useQuery({
+    queryKey: queryKeys.galleryMaterials(postId),
+    queryFn: () => fetchGalleryMaterials(postId),
+  });
+
+const RELATED_POST_LIMIT = 10;
+
+export const usePostsRelatedToProduct = (productId: string) =>
+  useQuery({
+    queryKey: queryKeys.galleryPosts.relatedToProduct(productId),
+    queryFn: () => fetchPostsRelatedToProduct(productId, RELATED_POST_LIMIT),
   });
 
 export const useDeleteGalleryPost = () => {

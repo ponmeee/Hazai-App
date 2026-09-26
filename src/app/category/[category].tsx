@@ -31,7 +31,7 @@ function CategoryContent({ category }: { category: Category }) {
             posts.length === 0 ? (
               <EmptyState title="まだ作品がありません" />
             ) : (
-              <GalleryPortraitList posts={posts} />
+              <GalleryPortraitList posts={posts} feed={{ categorySlug: category.slug }} />
             )
           }
         </QueryView>

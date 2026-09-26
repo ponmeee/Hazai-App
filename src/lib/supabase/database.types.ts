@@ -283,6 +283,57 @@ export type Database = {
           },
         ];
       };
+      gallery_post_materials: {
+        Row: {
+          created_at: string;
+          gallery_post_id: string;
+          id: string;
+          image_bucket: string | null;
+          image_path: string | null;
+          listing_id: string | null;
+          name: string;
+          sort_order: number;
+          tags: string[];
+        };
+        Insert: {
+          created_at?: string;
+          gallery_post_id: string;
+          id?: string;
+          image_bucket?: string | null;
+          image_path?: string | null;
+          listing_id?: string | null;
+          name: string;
+          sort_order?: number;
+          tags?: string[];
+        };
+        Update: {
+          created_at?: string;
+          gallery_post_id?: string;
+          id?: string;
+          image_bucket?: string | null;
+          image_path?: string | null;
+          listing_id?: string | null;
+          name?: string;
+          sort_order?: number;
+          tags?: string[];
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'gallery_post_materials_gallery_post_id_fkey';
+            columns: ['gallery_post_id'];
+            isOneToOne: false;
+            referencedRelation: 'gallery_posts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'gallery_post_materials_listing_id_fkey';
+            columns: ['listing_id'];
+            isOneToOne: false;
+            referencedRelation: 'listings';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       gallery_posts: {
         Row: {
           author_id: string;
@@ -372,6 +423,7 @@ export type Database = {
           shipping_methods: string[];
           size: string | null;
           status: string;
+          tags: string[];
           title: string;
           updated_at: string;
           weight: string | null;
@@ -388,6 +440,7 @@ export type Database = {
           shipping_methods: string[];
           size?: string | null;
           status?: string;
+          tags?: string[];
           title: string;
           updated_at?: string;
           weight?: string | null;
@@ -404,6 +457,7 @@ export type Database = {
           shipping_methods?: string[];
           size?: string | null;
           status?: string;
+          tags?: string[];
           title?: string;
           updated_at?: string;
           weight?: string | null;
@@ -451,6 +505,90 @@ export type Database = {
           {
             foreignKeyName: 'messages_sender_id_fkey';
             columns: ['sender_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      order_items: {
+        Row: {
+          created_at: string;
+          id: string;
+          image_path: string | null;
+          listing_id: string | null;
+          order_id: string;
+          price: number;
+          seller_id: string | null;
+          title: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          image_path?: string | null;
+          listing_id?: string | null;
+          order_id: string;
+          price: number;
+          seller_id?: string | null;
+          title: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          image_path?: string | null;
+          listing_id?: string | null;
+          order_id?: string;
+          price?: number;
+          seller_id?: string | null;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'order_items_listing_id_fkey';
+            columns: ['listing_id'];
+            isOneToOne: true;
+            referencedRelation: 'listings';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: false;
+            referencedRelation: 'orders';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_seller_id_fkey';
+            columns: ['seller_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      orders: {
+        Row: {
+          buyer_id: string;
+          created_at: string;
+          id: string;
+          total_price: number;
+        };
+        Insert: {
+          buyer_id: string;
+          created_at?: string;
+          id?: string;
+          total_price: number;
+        };
+        Update: {
+          buyer_id?: string;
+          created_at?: string;
+          id?: string;
+          total_price?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'orders_buyer_id_fkey';
+            columns: ['buyer_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
@@ -511,6 +649,7 @@ export type Database = {
           p_category: string;
           p_description: string;
           p_image_paths: string[];
+          p_materials?: Json;
           p_title: string;
         };
         Returns: string;
@@ -524,6 +663,7 @@ export type Database = {
           p_price: number;
           p_shipping_methods: string[];
           p_size: string | null;
+          p_tags?: string[];
           p_title: string;
           p_weight: string | null;
         };
@@ -549,9 +689,24 @@ export type Database = {
           updated_at: string;
         }[];
       };
+      get_related_gallery_posts: {
+        Args: { p_limit?: number; p_listing_id: string };
+        Returns: {
+          gallery_post_id: string;
+          score: number;
+        }[];
+      };
       is_conversation_member: {
         Args: { p_conversation_id: string };
         Returns: boolean;
+      };
+      is_valid_tags: {
+        Args: { p_tags: string[] };
+        Returns: boolean;
+      };
+      purchase_listings: {
+        Args: { p_listing_ids: string[] };
+        Returns: string;
       };
       start_conversation: {
         Args: { p_listing_id?: string | null; p_other_user_id: string };

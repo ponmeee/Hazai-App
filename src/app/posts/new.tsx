@@ -9,6 +9,7 @@ import { Screen } from '@/components/Screen';
 import { SuccessState } from '@/components/SuccessState';
 import { RequireAuth } from '@/features/auth/components/RequireAuth';
 import { getCategoryOptions } from '@/features/categories/queries';
+import { MaterialsField } from '@/features/posting/components/MaterialsField';
 import { PostEditorCard } from '@/features/posting/components/PostEditorCard';
 import { usePostForm } from '@/features/posting/usePostForm';
 import { useTransientMessage } from '@/hooks/useTransientMessage';
@@ -33,7 +34,7 @@ function NewPostForm({ author }: { author: UserSummary }) {
   }
 
   // カード内の入力欄には個別のエラー表示がないため、最初の問題を送信ボタンの上に出す
-  const firstError = errors.images ?? errors.title ?? errors.body ?? null;
+  const firstError = errors.images ?? errors.title ?? errors.body ?? errors.materials ?? null;
 
   return (
     <>
@@ -51,6 +52,12 @@ function NewPostForm({ author }: { author: UserSummary }) {
           />
         </FormField>
         <PostEditorCard values={values} setField={setField} author={author} onImagePickError={showNotice} />
+        <MaterialsField
+          materials={values.materials}
+          onChange={(materials) => setField('materials', materials)}
+          onPickError={showNotice}
+          error={errors.materials}
+        />
       </ScrollView>
       <FormFooter
         submitLabel={isSubmitting ? '投稿中…' : '作品を投稿する'}

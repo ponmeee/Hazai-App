@@ -3,7 +3,7 @@ import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
 
 import { toAppError, unwrap } from '@/api/errors';
-import { PROFILE_SUMMARY_COLUMNS, toAccount } from '@/api/mappers';
+import { PROFILE_COLUMNS, PROFILE_STATS_COLUMNS, toAccount } from '@/api/mappers';
 import { supabase } from '@/lib/supabase/client';
 import { removeImages, uploadImage } from '@/lib/supabase/storage';
 import type { PickedImage } from '@/features/uploads/pickImages';
@@ -69,8 +69,8 @@ export async function signOut(): Promise<void> {
 
 export async function fetchAccount(user: Pick<User, 'id' | 'email'>): Promise<Account> {
   const [profile, stats] = await Promise.all([
-    supabase.from('profiles').select(`${PROFILE_SUMMARY_COLUMNS}, bio` as const).eq('id', user.id).single(),
-    supabase.from('profile_stats').select('follower_count, following_count, like_count').eq('id', user.id).maybeSingle(),
+    supabase.from('profiles').select(PROFILE_COLUMNS).eq('id', user.id).single(),
+    supabase.from('profile_stats').select(PROFILE_STATS_COLUMNS).eq('id', user.id).maybeSingle(),
   ]);
   return toAccount(unwrap(profile), stats.data, user.email ?? '');
 }
