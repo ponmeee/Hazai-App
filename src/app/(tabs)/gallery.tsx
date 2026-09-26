@@ -38,7 +38,9 @@ export default function GalleryScreen() {
       <FlatList
         data={postsQuery.data ?? []}
         keyExtractor={(post) => post.id}
-        renderItem={({ item }) => <GalleryPostCard post={item} />}
+        renderItem={({ item }) => (
+          <GalleryPostCard post={item} feed={{ categorySlug: selectedCategory ?? undefined }} />
+        )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListHeaderComponent={
           <View style={styles.listHeader}>

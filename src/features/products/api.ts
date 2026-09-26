@@ -14,9 +14,12 @@ const toSearchPattern = (keyword: string | undefined): string | null => {
 /** 一覧には販売中の商品だけを出す（自分の非公開商品も RLS 上は読めるため明示的に絞る） */
 const activeListings = () => supabase.from('listings').select(LISTING_SELECT).eq('status', 'active');
 
-export async function fetchProducts({ categorySlug, keyword }: ProductListFilter): Promise<Product[]> {
+export async function fetchProducts({ categorySlug, keyword, tags, sellerId }: ProductListFilter): Promise<Product[]> {
   let query = activeListings().order('created_at', { ascending: false });
   if (categorySlug !== undefined) query = query.eq('category', categorySlug);
+  if (sellerId !== undefined) query = query.eq('seller_id', sellerId);
+  // 指定したハッシュタグのいずれかを持つ出品
+  if (tags !== undefined && tags.length > 0) query = query.overlaps('tags', tags);
   const pattern = toSearchPattern(keyword);
   if (pattern !== null) query = query.or(`title.ilike.${pattern},description.ilike.${pattern}`);
   return unwrap(await query).map(toProduct);
@@ -46,6 +49,7 @@ export type ProductInput = {
   description: string;
   price: number;
   shippingMethods: ShippingMethod[];
+  tags: string[];
 };
 
 /** 商品と画像（Storage にアップロード済みのパス）を 1 トランザクションで登録する */
@@ -61,6 +65,7 @@ export async function createProduct(input: ProductInput, imagePaths: string[]): 
       p_condition: input.condition,
       p_shipping_methods: input.shippingMethods,
       p_image_paths: imagePaths,
+      p_tags: input.tags,
     }),
   );
   return fetchProduct(id);
@@ -79,6 +84,7 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Pr
       weight: input.weight,
       condition: input.condition,
       shipping_methods: input.shippingMethods,
+      tags: input.tags,
     })
     .eq('id', id)
     .select(LISTING_SELECT)

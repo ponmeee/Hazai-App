@@ -15,7 +15,7 @@ const accountItems: { label: string; href?: Href }[] = [
   { label: 'プロフィール編集', href: '/profile/edit' },
   { label: 'メールアドレス・パスワード変更' },
   { label: '配送先住所' },
-  { label: '購入履歴' },
+  { label: '購入履歴', href: '/purchases' },
   { label: '本人確認' },
 ];
 

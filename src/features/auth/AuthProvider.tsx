@@ -21,6 +21,8 @@ type AuthContextValue = AuthState & {
   signUp: (input: authApi.RegisterInput, avatar?: PickedImage) => Promise<authApi.SignUpResult>;
   signOut: () => Promise<void>;
   setAccount: (account: Account) => void;
+  /** フォロー数など、サーバー側で変わった自分の情報を読み直す */
+  refreshAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -105,6 +107,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       setAccount: (account) => setState({ status: 'signedIn', account }),
+      refreshAccount: async () => {
+        if (state.status !== 'signedIn') return;
+        const account = await authApi.fetchAccount(state.account);
+        if (loadedUserIdRef.current === account.id) setState({ status: 'signedIn', account });
+      },
     }),
     [state, applySession],
   );

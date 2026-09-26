@@ -26,6 +26,7 @@ const toFormValues = (product: Product): ListingFormValues => ({
   description: product.description,
   price: String(product.price),
   shippingMethods: product.shippingMethods,
+  tags: product.tags,
 });
 
 export function useEditListingForm(product: Product) {

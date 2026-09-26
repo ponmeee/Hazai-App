@@ -41,6 +41,9 @@ export type ProductCondition = 'new' | 'likeNew' | 'good' | 'fair' | 'poor';
 
 export type ShippingMethod = 'delivery' | 'post';
 
+/** active: 販売中 / sold: 売り切れ / hidden: 非公開（出品者のみ閲覧可） */
+export type ProductStatus = 'active' | 'sold' | 'hidden';
+
 /** 金額は円単位の整数、日時は ISO 8601 文字列で保持する */
 export type Product = {
   id: string;
@@ -53,9 +56,37 @@ export type Product = {
   weight: string | null;
   condition: ProductCondition | null;
   shippingMethods: ShippingMethod[];
+  /** 「#」を除いた小文字のハッシュタグ */
+  tags: string[];
+  status: ProductStatus;
   favoriteCount: number;
   createdAt: string;
   seller: UserSummary;
+};
+
+/** 購入時点の商品名・価格・画像を残した明細。出品が削除されると productId は null になる */
+export type OrderItem = {
+  id: string;
+  productId: string | null;
+  name: string;
+  price: number;
+  imageUrl: string | null;
+};
+
+export type Order = {
+  id: string;
+  totalPrice: number;
+  createdAt: string;
+  items: OrderItem[];
+};
+
+/** 作品に使った端材。購入した出品から選んだものは productId を持つ（出品が削除されると null） */
+export type GalleryMaterial = {
+  id: string;
+  productId: string | null;
+  name: string;
+  imageUrl: string | null;
+  tags: string[];
 };
 
 export type GalleryPost = {

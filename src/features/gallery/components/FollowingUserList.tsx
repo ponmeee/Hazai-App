@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { UserAvatar } from '@/components/UserAvatar';
 import { colors, layout, spacing, typography } from '@/theme';
@@ -18,12 +19,18 @@ export function FollowingUserList({ users }: FollowingUserListProps) {
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
         {users.map((user) => (
-          <View key={user.id} style={styles.user}>
-            <UserAvatar uri={user.avatarUrl} size={AVATAR_SIZE} name={user.name} />
-            <Text style={styles.name} numberOfLines={1}>
-              {user.name}
-            </Text>
-          </View>
+          <Link key={user.id} href={{ pathname: '/users/[id]', params: { id: user.id } }} asChild>
+            <Pressable accessibilityLabel={`${user.name}のプロフィール`}>
+              {({ pressed }) => (
+                <View style={[styles.user, pressed && styles.pressed]}>
+                  <UserAvatar uri={user.avatarUrl} size={AVATAR_SIZE} name={user.name} />
+                  <Text style={styles.name} numberOfLines={1}>
+                    {user.name}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </Link>
         ))}
       </ScrollView>
     </View>
@@ -47,6 +54,9 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     alignItems: 'center',
     gap: spacing.xs,
+  },
+  pressed: {
+    opacity: 0.7,
   },
   name: {
     ...typography.caption,

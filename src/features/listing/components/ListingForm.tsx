@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { ChipSelector } from '@/components/ChipSelector';
 import { FormField } from '@/components/FormField';
 import { FormInput } from '@/components/FormInput';
+import { HashtagInput } from '@/components/HashtagInput';
 import { getCategoryOptions } from '@/features/categories/queries';
 import {
   productConditionLabels,
@@ -78,6 +79,13 @@ export function ListingForm({ values, errors, setField, onImagePickError, showIm
           onPress={(slug) => setField('categorySlug', slug)}
         />
       </FormField>
+
+      <HashtagInput
+        tags={values.tags}
+        onChange={(tags) => setField('tags', tags)}
+        placeholder="例：栗 広葉樹 無垢材"
+        hint="素材の種類や樹種など。検索や、この端材を使った作品とのつながりに使われます"
+      />
 
       <View style={styles.group}>
         <Text style={styles.groupTitle}>商品の仕様・状態</Text>

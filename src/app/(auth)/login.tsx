@@ -2,17 +2,17 @@ import { useMutation } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { getErrorMessage } from '@/api/errors';
 import { FormInput } from '@/components/FormInput';
-import { IconButton } from '@/components/IconButton';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { leaveAuthScreen } from '@/features/auth/navigation';
 import { validateLogin, type LoginErrors } from '@/features/auth/validation';
-import { colors, layout, radius, spacing, typography } from '@/theme';
+import { colors, fontWeights, layout, radius, spacing, typography } from '@/theme';
 import { goBackOr } from '@/utils/navigation';
 
 // 画像素材の縦横比（左上の三角 361×334、ロゴ文字 646×294、箱のマーク 305×336、下の波 1026×511）
@@ -50,10 +50,17 @@ export default function LoginScreen() {
             contentFit="fill"
             style={styles.cornerImage}
           />
-          <View style={styles.closeButton}>
-            {/* 起動時はホームの上に重ねて出すため、閉じるとホーム（または開く前の画面）に戻る */}
-            <IconButton icon="close" color={colors.textOnDark} accessibilityLabel="閉じる" onPress={() => goBackOr('/')} />
-          </View>
+          {/* 起動時はホームの上に重ねて出すため、閉じるとホーム（または開く前の画面）に戻る */}
+          <Pressable
+            onPress={() => goBackOr('/')}
+            accessibilityRole="button"
+            accessibilityLabel="閉じる（ログインせずに閲覧する）"
+            hitSlop={spacing.sm}
+            style={({ pressed }) => [styles.closeButton, pressed && styles.closePressed]}
+          >
+            <Ionicons name="close" size={24} color={colors.textOnDark} />
+            <Text style={styles.closeHint}>← 閲覧はこちらから</Text>
+          </Pressable>
         </View>
 
         <View style={styles.brand} accessible accessibilityRole="header" accessibilityLabel="はざい箱">
@@ -128,8 +135,19 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: spacing.sm,
-    left: spacing.sm,
+    top: spacing.md,
+    left: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  closePressed: {
+    opacity: 0.6,
+  },
+  closeHint: {
+    ...typography.caption,
+    ...fontWeights.bold,
+    color: colors.textOnDark,
   },
   brand: {
     flexDirection: 'row',

@@ -20,6 +20,7 @@ function toProductInput(values: ListingFormValues): ProductInput {
     description: values.description.trim(),
     price,
     shippingMethods: values.shippingMethods,
+    tags: values.tags,
   };
 }
 

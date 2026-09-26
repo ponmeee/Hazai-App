@@ -19,6 +19,7 @@ export type ListingFormValues = {
   /** 入力途中の値も保持するため文字列で持ち、送信時に数値へ変換する */
   price: string;
   shippingMethods: ShippingMethod[];
+  tags: string[];
 };
 
 export type ListingFormErrors = Partial<Record<keyof ListingFormValues, string>>;
@@ -33,6 +34,7 @@ export const initialListingFormValues: ListingFormValues = {
   description: '',
   price: '',
   shippingMethods: [],
+  tags: [],
 };
 
 const toHalfWidthDigits = (value: string): string =>

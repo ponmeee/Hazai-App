@@ -5,10 +5,13 @@ import type {
   CategorySlug,
   Conversation,
   GalleryComment,
+  GalleryMaterial,
   GalleryPost,
   Message,
+  Order,
   Product,
   ProductCondition,
+  ProductStatus,
   ShippingMethod,
   UserProfile,
   UserSummary,
@@ -22,9 +25,14 @@ import type {
 export const PROFILE_SUMMARY_COLUMNS = 'id, display_name, avatar_url, location, genre' as const;
 
 export const LISTING_SELECT = `id, title, description, price, category, status, size, weight, condition,
-  shipping_methods, favorite_count, created_at,
+  shipping_methods, tags, favorite_count, created_at,
   seller:profiles!listings_seller_id_fkey(${PROFILE_SUMMARY_COLUMNS}),
   listing_images(storage_path, sort_order)` as const;
+
+export const GALLERY_MATERIAL_COLUMNS = 'id, listing_id, name, image_bucket, image_path, tags' as const;
+
+export const ORDER_SELECT = `id, total_price, created_at,
+  order_items(id, listing_id, title, price, image_path)` as const;
 
 export const GALLERY_POST_SELECT = `id, title, description, category, like_count, comment_count, created_at,
   author:profiles!gallery_posts_author_id_fkey(${PROFILE_SUMMARY_COLUMNS}),
@@ -49,9 +57,20 @@ export type ListingRow = Pick<
   | 'weight'
   | 'condition'
   | 'shipping_methods'
+  | 'tags'
+  | 'status'
   | 'favorite_count'
   | 'created_at'
 > & { seller: ProfileSummaryRow; listing_images: ImageRow[] };
+
+type GalleryMaterialRow = Pick<
+  Tables<'gallery_post_materials'>,
+  'id' | 'listing_id' | 'name' | 'image_bucket' | 'image_path' | 'tags'
+>;
+
+type OrderRow = Pick<Tables<'orders'>, 'id' | 'total_price' | 'created_at'> & {
+  order_items: Pick<Tables<'order_items'>, 'id' | 'listing_id' | 'title' | 'price' | 'image_path'>[];
+};
 
 export type GalleryPostRow = Pick<
   Tables<'gallery_posts'>,
@@ -88,12 +107,16 @@ type ConversationRow = {
 const CATEGORY_SLUGS: readonly CategorySlug[] = ['wood', 'glass', 'fabric', 'acrylic', 'leather', 'metal', 'paper', 'other'];
 const PRODUCT_CONDITIONS: readonly ProductCondition[] = ['new', 'likeNew', 'good', 'fair', 'poor'];
 const SHIPPING_METHODS: readonly ShippingMethod[] = ['delivery', 'post'];
+const PRODUCT_STATUSES: readonly ProductStatus[] = ['active', 'sold', 'hidden'];
 
 // 値の範囲は DB の CHECK 制約で保証しているが、型を絞るためにここでも確認する
 const toCategorySlug = (value: string): CategorySlug =>
   CATEGORY_SLUGS.find((slug) => slug === value) ?? 'other';
 const toCondition = (value: string | null): ProductCondition | null =>
   PRODUCT_CONDITIONS.find((condition) => condition === value) ?? null;
+// 不明な値は購入できない側（非公開）に倒す
+const toProductStatus = (value: string): ProductStatus =>
+  PRODUCT_STATUSES.find((status) => status === value) ?? 'hidden';
 const toShippingMethods = (values: string[]): ShippingMethod[] =>
   SHIPPING_METHODS.filter((method) => values.includes(method));
 
@@ -111,20 +134,24 @@ export const toUserSummary = (row: ProfileSummaryRow): UserSummary => ({
   genre: row.genre,
 });
 
-export const toAccount = (
-  profile: ProfileSummaryRow & Pick<Tables<'profiles'>, 'bio'>,
-  stats: { follower_count: number | null; following_count: number | null; like_count: number | null } | null,
-  email: string,
-): Account => {
-  const userProfile: UserProfile = {
-    ...toUserSummary(profile),
-    bio: profile.bio,
-    followerCount: stats?.follower_count ?? 0,
-    followingCount: stats?.following_count ?? 0,
-    likeCount: stats?.like_count ?? 0,
-  };
-  return { ...userProfile, email };
-};
+export const PROFILE_COLUMNS = `${PROFILE_SUMMARY_COLUMNS}, bio` as const;
+export const PROFILE_STATS_COLUMNS = 'follower_count, following_count, like_count' as const;
+
+type ProfileRow = ProfileSummaryRow & Pick<Tables<'profiles'>, 'bio'>;
+type ProfileStatsRow = { follower_count: number | null; following_count: number | null; like_count: number | null };
+
+export const toUserProfile = (profile: ProfileRow, stats: ProfileStatsRow | null): UserProfile => ({
+  ...toUserSummary(profile),
+  bio: profile.bio,
+  followerCount: stats?.follower_count ?? 0,
+  followingCount: stats?.following_count ?? 0,
+  likeCount: stats?.like_count ?? 0,
+});
+
+export const toAccount = (profile: ProfileRow, stats: ProfileStatsRow | null, email: string): Account => ({
+  ...toUserProfile(profile, stats),
+  email,
+});
 
 export const toProduct = (row: ListingRow): Product => ({
   id: row.id,
@@ -137,6 +164,8 @@ export const toProduct = (row: ListingRow): Product => ({
   weight: row.weight,
   condition: toCondition(row.condition),
   shippingMethods: toShippingMethods(row.shipping_methods),
+  tags: row.tags,
+  status: toProductStatus(row.status),
   favoriteCount: row.favorite_count,
   createdAt: row.created_at,
   seller: toUserSummary(row.seller),
@@ -206,4 +235,30 @@ export const toConversation = (row: ConversationRow): Conversation => ({
           created_at: row.last_message_created_at,
         }),
   updatedAt: row.updated_at,
+});
+
+export const toOrder = (row: OrderRow): Order => ({
+  id: row.id,
+  totalPrice: row.total_price,
+  createdAt: row.created_at,
+  items: row.order_items.map((item) => ({
+    id: item.id,
+    productId: item.listing_id,
+    name: item.title,
+    price: item.price,
+    imageUrl: item.image_path === null ? null : getPublicImageUrl('listing-images', item.image_path),
+  })),
+});
+
+const toMaterialImageUrl = (bucket: string | null, path: string | null): string | null => {
+  if (path === null) return null;
+  return getPublicImageUrl(bucket === 'listing-images' ? 'listing-images' : 'gallery-images', path);
+};
+
+export const toGalleryMaterial = (row: GalleryMaterialRow): GalleryMaterial => ({
+  id: row.id,
+  productId: row.listing_id,
+  name: row.name,
+  imageUrl: toMaterialImageUrl(row.image_bucket, row.image_path),
+  tags: row.tags,
 });

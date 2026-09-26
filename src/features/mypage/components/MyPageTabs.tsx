@@ -1,6 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-import { colors, layout, spacing, typography } from '@/theme';
+import { UnderlineTabs } from '@/components/UnderlineTabs';
 
 export type MyPageTab = 'gallery' | 'settings';
 
@@ -15,48 +13,5 @@ type MyPageTabsProps = {
 };
 
 export function MyPageTabs({ selected, onSelect }: MyPageTabsProps) {
-  return (
-    <View style={styles.container} accessibilityRole="tablist">
-      {tabs.map((tab) => {
-        const isSelected = tab.key === selected;
-        return (
-          <Pressable
-            key={tab.key}
-            onPress={() => onSelect(tab.key)}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: isSelected }}
-            style={[styles.tab, isSelected && styles.tabSelected]}
-          >
-            <Text style={[styles.label, isSelected && styles.labelSelected]}>{tab.label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
+  return <UnderlineTabs tabs={tabs} selected={selected} onSelect={onSelect} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    marginHorizontal: layout.screenPaddingX,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabSelected: {
-    borderBottomColor: colors.textPrimary,
-  },
-  label: {
-    ...typography.label,
-    color: colors.textTertiary,
-  },
-  labelSelected: {
-    color: colors.textPrimary,
-  },
-});

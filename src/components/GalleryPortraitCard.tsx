@@ -3,6 +3,7 @@ import { Link } from 'expo-router';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { getCategoryName } from '@/features/categories/queries';
+import { postDetailHref, type PostFeed } from '@/features/gallery/navigation';
 import { colors, radius, spacing } from '@/theme';
 import type { GalleryPost } from '@/types/models';
 
@@ -14,12 +15,14 @@ import { PostAuthorMeta } from './PostAuthorMeta';
 type GalleryPortraitCardProps = {
   post: GalleryPost;
   style?: StyleProp<ViewStyle>;
+  /** 作品詳細で前後にスライドするときの並び（開いた元の一覧の条件） */
+  feed?: PostFeed;
 };
 
 /** 写真を全面に敷いた縦長の作品カード。横スクロールの一覧で使う */
-export function GalleryPortraitCard({ post, style }: GalleryPortraitCardProps) {
+export function GalleryPortraitCard({ post, style, feed }: GalleryPortraitCardProps) {
   return (
-    <Link href={{ pathname: '/posts/[id]', params: { id: post.id } }} asChild>
+    <Link href={postDetailHref(post.id, feed)} asChild>
       <Pressable accessibilityLabel={`${post.title}の詳細`} style={style}>
         {({ pressed }) => (
           <View style={[styles.container, pressed && styles.pressed]}>

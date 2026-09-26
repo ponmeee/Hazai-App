@@ -43,7 +43,7 @@ function MyPageContent({ account }: { account: Account }) {
                 <TwoColumnGrid
                   items={posts}
                   keyExtractor={(post) => post.id}
-                  renderItem={(post) => <GalleryPostTile post={post} />}
+                  renderItem={(post) => <GalleryPostTile post={post} feed={{ authorId: account.id }} />}
                 />
               )
             }

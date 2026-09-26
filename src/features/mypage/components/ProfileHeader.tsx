@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { UserAvatar } from '@/components/UserAvatar';
@@ -6,10 +7,13 @@ import type { UserProfile } from '@/types/models';
 
 type ProfileHeaderProps = {
   user: UserProfile;
-  onEdit: () => void;
+  /** 自分のプロフィールでは編集ボタンを出す */
+  onEdit?: () => void;
+  /** 他の人のプロフィールで右側に置く操作（フォローボタンなど） */
+  action?: ReactNode;
 };
 
-export function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
+export function ProfileHeader({ user, onEdit, action }: ProfileHeaderProps) {
   const meta = [user.location, user.genre].filter((value) => value !== '').join(' / ');
 
   return (
@@ -20,14 +24,17 @@ export function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
           <Text style={styles.name}>{user.name}</Text>
           {meta !== '' && <Text style={styles.meta}>{meta}</Text>}
         </View>
-        <Pressable
-          onPress={onEdit}
-          accessibilityRole="button"
-          accessibilityLabel="プロフィールを編集"
-          style={({ pressed }) => [styles.editButton, pressed && styles.editPressed]}
-        >
-          <Text style={styles.editLabel}>編集</Text>
-        </Pressable>
+        {onEdit !== undefined && (
+          <Pressable
+            onPress={onEdit}
+            accessibilityRole="button"
+            accessibilityLabel="プロフィールを編集"
+            style={({ pressed }) => [styles.editButton, pressed && styles.editPressed]}
+          >
+            <Text style={styles.editLabel}>編集</Text>
+          </Pressable>
+        )}
+        {action}
       </View>
       {user.bio !== '' && <Text style={styles.bio}>{user.bio}</Text>}
     </View>

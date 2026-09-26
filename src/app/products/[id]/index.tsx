@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { getErrorMessage } from '@/api/errors';
 import { CategoryTag } from '@/components/CategoryTag';
+import { HashtagChip } from '@/components/HashtagChip';
 import { Header } from '@/components/Header';
 import { Notice } from '@/components/Notice';
 import { OwnerActionBar } from '@/components/OwnerActionBar';
@@ -12,6 +13,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useProductCart } from '@/features/cart/hooks';
 import { getCategoryName } from '@/features/categories/queries';
 import { useProductFavorite } from '@/features/favorites/hooks';
+import { RelatedPostsSection } from '@/features/gallery/components/RelatedPostsSection';
 import { useStartConversation } from '@/features/messages/hooks';
 import { ProductActionBar } from '@/features/products/components/ProductActionBar';
 import { ProductImageViewer } from '@/features/products/components/ProductImageViewer';
@@ -19,6 +21,7 @@ import { ProductSpecList, type ProductSpec } from '@/features/products/component
 import { SellerCard } from '@/features/products/components/SellerCard';
 import { useDeleteProduct, useProduct } from '@/features/products/hooks';
 import { productConditionLabels, shippingMethodLabels } from '@/features/products/labels';
+import { openTagSearch } from '@/features/products/navigation';
 import { useTransientMessage } from '@/hooks/useTransientMessage';
 import { colors, layout, shadows, spacing, typography } from '@/theme';
 import type { Product } from '@/types/models';
@@ -66,6 +69,14 @@ function ProductDetail({ product }: { product: Product }) {
     });
   };
 
+  const purchase = () => {
+    if (status !== 'signedIn') {
+      router.push('/login');
+      return;
+    }
+    router.push({ pathname: '/checkout', params: { ids: product.id } });
+  };
+
   const contactSeller = () => {
     if (status !== 'signedIn') {
       router.push('/login');
@@ -91,6 +102,13 @@ function ProductDetail({ product }: { product: Product }) {
             <CategoryTag label={getCategoryName(product.categorySlug)} tone="muted" />
             <Text style={styles.name}>{product.name}</Text>
             <Text style={styles.price}>{formatPrice(product.price)}</Text>
+            {product.tags.length > 0 && (
+              <View style={styles.tags}>
+                {product.tags.map((tag) => (
+                  <HashtagChip key={tag} tag={tag} onPress={() => openTagSearch([tag])} />
+                ))}
+              </View>
+            )}
           </View>
 
           <View style={styles.section}>
@@ -112,6 +130,8 @@ function ProductDetail({ product }: { product: Product }) {
             />
           </View>
         </View>
+
+        <RelatedPostsSection productId={product.id} style={styles.related} />
       </ScrollView>
 
       <View>
@@ -122,7 +142,7 @@ function ProductDetail({ product }: { product: Product }) {
         )}
         {isOwnProduct ? (
           <OwnerActionBar
-            note="あなたが出品した商品です"
+            note={product.status === 'sold' ? 'この商品は売れました' : 'あなたが出品した商品です'}
             deleteLabel="出品を取り消す"
             isDeleting={deleteProduct.isPending}
             onDelete={removeListing}
@@ -137,9 +157,10 @@ function ProductDetail({ product }: { product: Product }) {
             isFavorite={favorite.isFavorite}
             isInCart={cart.isInCart}
             isUpdatingCart={cart.isUpdating}
+            isSoldOut={product.status !== 'active'}
             onToggleFavorite={toggleFavorite}
             onToggleCart={toggleCart}
-            onPurchase={() => showNotice('決済機能は準備中です')}
+            onPurchase={purchase}
           />
         )}
       </View>
@@ -179,6 +200,11 @@ const styles = StyleSheet.create({
     ...typography.display,
     color: colors.textPrimary,
   },
+  tags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
   section: {
     gap: spacing.md,
   },
@@ -189,6 +215,9 @@ const styles = StyleSheet.create({
   description: {
     ...typography.body,
     color: colors.textSecondary,
+  },
+  related: {
+    marginTop: spacing.xxl,
   },
   ownerActions: {
     ...shadows.floating,
