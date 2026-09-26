@@ -119,7 +119,7 @@ npx expo start --web      # http://localhost:8081
 | `cart_items`                                          | カート（ユーザー × 商品で一意）                                                        |
 | `conversations` / `conversation_members` / `messages` | 商品についての 1 対 1 チャット                                                         |
 
-### セキュリティの方針aiueo
+### セキュリティの方針
 
 - すべてのテーブルで RLS を有効化し、`auth.uid()` で本人を判定しています。ブラウザから Supabase API を直接呼ばれても他人のデータは変更できません。
 - 所有者の列（`seller_id` / `user_id` / `sender_id` など）は DB の既定値 `auth.uid()` で決まり、**クライアントから値を送る権限自体を与えていません**（列単位の GRANT）。なりすましはできません。
@@ -130,7 +130,7 @@ npx expo start --web      # http://localhost:8081
 
 これらは `npm run test:db` で自動検証しています（他人の商品を編集できない、会話外のユーザーがメッセージを読めない、他人の Storage に書き込めない など）。
 
-### DB 型定義 aaaiueokakikuke
+### DB 型定義 a
 
 `src/lib/supabase/database.types.ts` はマイグレーションに対応する型定義です。スキーマを変更したら再生成してください。
 
